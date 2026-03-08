@@ -76,10 +76,19 @@
     .tab{padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:-1px;transition:all .2s;white-space:nowrap;}
     .tab.active,.tab:hover{color:var(--gold);border-bottom-color:var(--gold);}
     .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:.78rem;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);}
-    #playerNav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,16,36,.92);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:none;padding:10px 20px;z-index:100;}
-    #playerNav .nav-inner{display:flex;justify-content:center;gap:8px;max-width:400px;margin:0 auto;}
-    .nav-btn{flex:1;padding:9px 8px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .18s;text-align:center;}
-    .nav-btn.active,.nav-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.08);}
+    #playerNav{position:fixed;bottom:0;left:0;right:0;background:rgba(7,9,26,.96);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.07);display:none;padding:8px 16px 12px;z-index:100;}
+    #playerNav .nav-inner{display:flex;justify-content:center;gap:6px;max-width:440px;margin:0 auto;align-items:flex-end;}
+    .nav-btn{flex:1;padding:8px 4px 6px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:500;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;max-width:72px;}
+    .nav-btn svg{transition:all .2s;opacity:.55;}
+    .nav-btn span{transition:all .2s;}
+    .nav-btn.active{color:var(--gold);background:rgba(240,192,64,.1);border-color:rgba(240,192,64,.2);}
+    .nav-btn.active svg{opacity:1;filter:drop-shadow(0 0 6px rgba(240,192,64,.5));}
+    .nav-btn:hover{color:var(--gold);background:rgba(240,192,64,.07);}
+    .nav-btn:hover svg{opacity:.9;}
+    .nav-btn-icon{flex:0 0 auto;width:44px;height:44px;border-radius:14px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--text2);}
+    .nav-btn-icon:hover,.nav-btn-icon.active{color:var(--gold);background:rgba(240,192,64,.1);border-color:rgba(240,192,64,.2);}
+    .nav-btn-icon svg{opacity:.55;transition:opacity .2s;}
+    .nav-btn-icon:hover svg,.nav-btn-icon.active svg{opacity:1;}
     .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
     .section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:10px;}
     .empty-state{text-align:center;padding:28px;color:var(--text2);font-size:.9rem;}
@@ -155,8 +164,9 @@
       </div>
 
       <hr class="divider">
-      <div class="text-center">
+      <div class="text-center" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="toggleAdminLogin()">🔐 Accesso Admin</button>
+        <button class="btn btn-secondary btn-sm" onclick="goTo('laureando-form')">📋 Compila profilo laureando</button>
       </div>
     </div>
     <div id="adminLoginCard" class="card" style="max-width:440px;margin:0 auto;display:none;">
@@ -254,6 +264,7 @@
       <button class="tab" onclick="showAdminTab('bm',this)">⚡ Bonus/Malus</button>
       <button class="tab" onclick="showAdminTab('game',this)">🎮 Gioco</button>
       <button class="tab" onclick="showAdminTab('players',this)">📊 Giocatori</button>
+      <button class="tab" onclick="showAdminTab('laureando',this)">📋 Laureando</button>
     </div>
 
     <div id="adminTab-setup" class="admin-tab">
@@ -318,17 +329,40 @@
     <div id="adminTab-players" class="admin-tab" style="display:none;">
       <div class="card"><h2 class="card-title">Giocatori (<span id="playerCount">0</span>)</h2><div id="adminPlayersList" class="mt-2"></div></div>
     </div>
+
+    <div id="adminTab-laureando" class="admin-tab" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <h2 class="card-title" style="margin:0;">📋 Profilo Laureando</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="lfAdminDownload('roster')">📥 Roster JSON</button>
+            <button class="btn btn-secondary btn-sm" onclick="lfAdminDownload('bm')">📥 Bonus/Malus JSON</button>
+            <button class="btn btn-primary btn-sm" onclick="lfAdminImport()">⬆️ Importa nell'app</button>
+          </div>
+        </div>
+        <div id="lf-admin-content">
+          <p style="color:var(--text2);font-size:.88rem;text-align:center;padding:20px 0;">Nessun dato ancora. Il laureando deve compilare il form e salvare.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- BOTTOM NAV -->
 <div id="playerNav">
   <div class="nav-inner">
-    <button class="nav-btn" id="nav-draft" onclick="goTo('draft')">📝 Draft</button>
-    <button class="nav-btn" id="nav-live" onclick="goTo('live')">🔴 Live</button>
-    <button class="nav-btn" id="nav-leaderboard" onclick="goTo('leaderboard')">🏆 Classifica</button>
-    <button class="nav-btn" id="nav-adminquick" onclick="showQuickAdmin()" style="max-width:44px;">🔐</button>
-    <button class="nav-btn" onclick="toggleGuide()" style="max-width:44px;">❓</button>
+    <button class="nav-btn" id="nav-draft" onclick="goTo('draft')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>Draft</span>
+    </button>
+    <button class="nav-btn" id="nav-live" onclick="goTo('live')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M8.56 2.9a9 9 0 0 0 0 18.2"/><path d="M15.44 2.9a9 9 0 0 1 0 18.2"/></svg><span>Live</span>
+    </button>
+    <button class="nav-btn" id="nav-leaderboard" onclick="goTo('leaderboard')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Classifica</span>
+    </button>
+    <button class="nav-btn-icon" id="nav-adminquick" onclick="showQuickAdmin()" title="Admin"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+    <button class="nav-btn-icon" onclick="toggleGuide()" title="Guida"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg></button>
   </div>
 </div>
 
@@ -343,7 +377,68 @@
 </div>
 
 <div id="toast" class="toast"></div>
-<button onclick="toggleGuide()" style="position:fixed;top:14px;right:14px;z-index:200;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Come si gioca">❓</button>
+<button onclick="toggleGuide()" style="position:fixed;top:14px;right:14px;z-index:200;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text2);border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;" title="Come si gioca" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.1)';this.style.color='var(--text2)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg></button>
+
+<!-- ═══════════ LAUREANDO FORM ═══════════ -->
+<div id="view-laureando-form" class="view">
+  <div class="container" style="max-width:680px;">
+    <div style="text-align:center;padding:32px 0 24px;">
+      <div style="font-size:3rem;margin-bottom:10px;">🎓</div>
+      <h1 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:2rem;margin-bottom:8px;">Compila il tuo profilo</h1>
+      <p style="color:var(--text2);font-size:.9rem;line-height:1.6;">Inserisci le persone che saranno alla tua cerimonia e gli eventi divertenti che potrebbero succedere.<br>L'organizzatore li importerà nell'app!</p>
+    </div>
+
+    <!-- Info base -->
+    <div class="card" style="margin-bottom:16px;">
+      <p class="section-label" style="margin-bottom:16px;">👤 Informazioni base</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group" style="margin:0;">
+          <label>Il tuo nome</label>
+          <input type="text" id="lf-name" placeholder="es. Marco Rossi">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Data laurea</label>
+          <input type="date" id="lf-date">
+        </div>
+      </div>
+    </div>
+
+    <!-- Roster -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <p class="section-label">👥 Persone presenti <span id="lf-roster-count" style="background:rgba(240,192,64,.15);color:var(--gold);border-radius:20px;padding:1px 9px;font-size:.72rem;font-weight:700;margin-left:6px;">0</span></p>
+      </div>
+      <p style="color:var(--text2);font-size:.83rem;margin-bottom:14px;line-height:1.5;">Professori, familiari, amici — tutte le persone che i giocatori potranno scegliere in squadra.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 32px;gap:8px;margin-bottom:6px;">
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Nome</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Ruolo</span>
+        <span></span>
+      </div>
+      <div id="lf-roster-rows"></div>
+      <button class="btn btn-secondary btn-sm mt-2" style="width:100%;border-style:dashed;" onclick="lfAddRoster()">＋ Aggiungi persona</button>
+    </div>
+
+    <!-- Bonus/Malus -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <p class="section-label">⚡ Bonus & Malus personalizzati <span id="lf-bm-count" style="background:rgba(240,192,64,.15);color:var(--gold);border-radius:20px;padding:1px 9px;font-size:.72rem;font-weight:700;margin-left:6px;">0</span></p>
+      </div>
+      <p style="color:var(--text2);font-size:.83rem;margin-bottom:14px;line-height:1.5;">Cose divertenti specifiche per la tua laurea. Punti positivi = bonus, negativi = malus.</p>
+      <div style="display:grid;grid-template-columns:1fr 70px 54px 32px;gap:8px;margin-bottom:6px;">
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Evento</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:center;">Punti</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:center;">Emoji</span>
+        <span></span>
+      </div>
+      <div id="lf-bm-rows"></div>
+      <button class="btn btn-secondary btn-sm mt-2" style="width:100%;border-style:dashed;" onclick="lfAddBM()">＋ Aggiungi evento</button>
+    </div>
+
+    <!-- Save button -->
+    <button class="btn btn-primary btn-full" onclick="lfSave()" style="margin-bottom:12px;">💾 Salva e invia all'organizzatore</button>
+    <button class="btn btn-secondary btn-full" onclick="goTo('home')" style="margin-bottom:40px;">← Torna indietro</button>
+  </div>
+</div>
 
 <!-- ═══════════ GUIDA PARTECIPANTI ═══════════ -->
 <div id="guideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:300;overflow-y:auto;padding:20px 16px 100px;">
@@ -667,12 +762,13 @@ window.onload = function() {
 ════════════════════════════════ */
 function goTo(name) {
   if (name === 'home') setTimeout(renderLoginForm, 50);
+  if (name === 'laureando-form') setTimeout(lfInitForm, 50);
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + name);
   if (el) el.classList.add('active');
   currentView = name;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const nb = document.getElementById('nav-' + name);
+  document.querySelectorAll('.nav-btn,.nav-btn-icon').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + name) || document.getElementById('nav-' + name + 'quick');
   if (nb) nb.classList.add('active');
   window.scrollTo(0,0);
   renderCurrentView();
@@ -681,6 +777,166 @@ function goTo(name) {
 /* ════════════════════════════════
    HOME
 ════════════════════════════════ */
+/* ════════════════════════════════
+   LAUREANDO FORM
+════════════════════════════════ */
+let lfRosterId = 0, lfBmId = 0;
+
+function lfInitForm() {
+  const rr = document.getElementById('lf-roster-rows');
+  const br = document.getElementById('lf-bm-rows');
+  if (rr && rr.children.length === 0) {
+    for (let i=0;i<6;i++) lfAddRoster();
+    for (let i=0;i<3;i++) lfAddBM();
+  }
+  // Pre-fill if saved before
+  fsGet('laureando','profile').then(doc => {
+    if (!doc || doc.error || !doc.fields) return;
+    const d = fromFirestore(doc.fields);
+    if (d.laureandoName) document.getElementById('lf-name').value = d.laureandoName;
+    if (d.laureaDate)    document.getElementById('lf-date').value  = d.laureaDate;
+    if (d.roster && d.roster.length) {
+      rr.innerHTML = ''; lfRosterId = 0;
+      d.roster.forEach(p => lfAddRoster(p.name, p.role));
+    }
+    if (d.bonusMalus && d.bonusMalus.length) {
+      br.innerHTML = ''; lfBmId = 0;
+      d.bonusMalus.forEach(b => lfAddBM(b.name, b.points, b.emoji));
+    }
+  });
+}
+
+function lfAddRoster(name='', role='') {
+  const id = lfRosterId++;
+  const div = document.createElement('div');
+  div.id = 'lfr-' + id;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 32px;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `
+    <input type="text" placeholder="es. Prof. Bianchi" value="${name}" oninput="lfUpdateCounts()">
+    <input type="text" placeholder="es. Relatore" value="${role}" oninput="lfUpdateCounts()">
+    <button onclick="document.getElementById('lfr-${id}').remove();lfUpdateCounts()" style="width:32px;height:32px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;color:var(--red);cursor:pointer;font-size:.85rem;">✕</button>`;
+  document.getElementById('lf-roster-rows').appendChild(div);
+  lfUpdateCounts();
+}
+
+function lfAddBM(name='', points='', emoji='') {
+  const id = lfBmId++;
+  const div = document.createElement('div');
+  div.id = 'lfb-' + id;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 70px 54px 32px;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `
+    <input type="text" placeholder="es. Cita la nonna nel discorso" value="${name}" oninput="lfUpdateCounts()">
+    <input type="number" placeholder="+5" value="${points}" min="-20" max="20" style="text-align:center;" oninput="lfUpdateCounts()">
+    <input type="text" placeholder="😂" value="${emoji}" maxlength="2" style="text-align:center;font-size:1.1rem;">
+    <button onclick="document.getElementById('lfb-${id}').remove();lfUpdateCounts()" style="width:32px;height:32px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;color:var(--red);cursor:pointer;font-size:.85rem;">✕</button>`;
+  document.getElementById('lf-bm-rows').appendChild(div);
+  lfUpdateCounts();
+}
+
+function lfUpdateCounts() {
+  const rc = document.querySelectorAll('#lf-roster-rows input[placeholder="es. Prof. Bianchi"]').length;
+  const bc = document.querySelectorAll('#lf-bm-rows input[placeholder="es. Cita la nonna nel discorso"]').length;
+  const rEl = document.getElementById('lf-roster-count');
+  const bEl = document.getElementById('lf-bm-count');
+  if (rEl) rEl.textContent = rc;
+  if (bEl) bEl.textContent = bc;
+}
+
+function lfCollectRoster() {
+  const rows = document.querySelectorAll('#lf-roster-rows > div');
+  const result = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    const role = inputs[1].value.trim();
+    if (name) result.push({ name, role: role || 'Ospite', totalPoints: 0 });
+  });
+  return result;
+}
+
+function lfCollectBM() {
+  const rows = document.querySelectorAll('#lf-bm-rows > div');
+  const result = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name   = inputs[0].value.trim();
+    const points = parseInt(inputs[1].value);
+    const emoji  = inputs[2].value.trim() || (points > 0 ? '⭐' : '💥');
+    if (name && !isNaN(points)) result.push({ name, points, emoji });
+  });
+  return result;
+}
+
+async function lfSave() {
+  const lname = document.getElementById('lf-name').value.trim();
+  const ldate = document.getElementById('lf-date').value;
+  const roster = lfCollectRoster();
+  const bm     = lfCollectBM();
+  if (!lname) { toast('Inserisci il tuo nome!', 'error'); return; }
+  if (!roster.length) { toast('Aggiungi almeno una persona!', 'error'); return; }
+  const data = { laureandoName: lname, laureaDate: ldate, roster, bonusMalus: bm, ts: Date.now() };
+  await fsSet('laureando', 'profile', data);
+  toast("✅ Salvato! L'organizzatore può ora scaricarlo dal pannello admin.", 'success');
+}
+
+async function lfAdminLoad() {
+  const doc = await fsGet('laureando', 'profile');
+  const el = document.getElementById('lf-admin-content');
+  if (!doc || doc.error || !doc.fields) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:.88rem;text-align:center;padding:20px 0;">Nessun dato ancora.</p>';
+    return;
+  }
+  const d = fromFirestore(doc.fields);
+  const rosterList = (d.roster||[]).map((p,i) => `<div style="display:flex;gap:10px;padding:8px 10px;background:${i%2?'var(--bg2)':'transparent'};border-radius:8px;"><span style="flex:1;">${p.name}</span><span style="color:var(--text2);font-size:.85rem;">${p.role}</span></div>`).join('');
+  const bmList = (d.bonusMalus||[]).map((b,i) => `<div style="display:flex;gap:10px;padding:8px 10px;background:${i%2?'var(--bg2)':'transparent'};border-radius:8px;align-items:center;"><span style="flex:1;">${b.emoji} ${b.name}</span><span style="font-weight:700;color:${b.points>0?'var(--green)':'var(--red)'};">${b.points>0?'+':''}${b.points}pt</span></div>`).join('');
+  el.innerHTML = `
+    <div style="margin-bottom:20px;padding:12px 16px;background:var(--bg2);border-radius:10px;">
+      <div style="font-size:.8rem;color:var(--text2);margin-bottom:4px;">Laureando</div>
+      <div style="font-weight:700;font-size:1.1rem;">${d.laureandoName||'—'}</div>
+      ${d.laureaDate?`<div style="font-size:.85rem;color:var(--text2);margin-top:2px;">📅 ${d.laureaDate}</div>`:''}
+    </div>
+    <p class="section-label" style="margin-bottom:8px;">👥 Persone (${(d.roster||[]).length})</p>
+    <div style="margin-bottom:20px;">${rosterList||'<p style="color:var(--text2);font-size:.85rem;">Nessuna persona.</p>'}</div>
+    <p class="section-label" style="margin-bottom:8px;">⚡ Bonus/Malus (${(d.bonusMalus||[]).length})</p>
+    <div>${bmList||'<p style="color:var(--text2);font-size:.85rem;">Nessun evento.</p>'}</div>`;
+  // Store for download
+  window._lfData = d;
+}
+
+function lfAdminDownload(type) {
+  const d = window._lfData;
+  if (!d) { toast('Nessun dato da scaricare', 'error'); return; }
+  const isRoster = type === 'roster';
+  const data = isRoster ? (d.roster||[]) : (d.bonusMalus||[]);
+  if (!data.length) { toast('Nessun dato disponibile', 'error'); return; }
+  const name = (d.laureandoName||'laureando').replace(/\s+/g,'_');
+  const filename = `fantalaurea_${name}_${isRoster?'roster':'bonusmalus'}.json`;
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  toast('✅ ' + filename + ' scaricato!', 'success');
+}
+
+async function lfAdminImport() {
+  const d = window._lfData;
+  if (!d) { toast('Nessun dato da importare', 'error'); return; }
+  let count = 0;
+  for (const p of (d.roster||[])) {
+    const id = p.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('roster', id, { name: p.name, role: p.role||'Ospite', totalPoints: 0 });
+    count++;
+  }
+  for (const bm of (d.bonusMalus||[])) {
+    const id = bm.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, { name: bm.name, points: bm.points, emoji: bm.emoji||'⭐' });
+    count++;
+  }
+  await pollAll();
+  toast(`✅ Importati ${count} elementi nell'app!`, 'success');
+}
+
 function renderLoginForm() {
   const savedNick = localStorage.getItem('fl_nick');
   const sec = document.getElementById('pinLoginSection');
@@ -1277,6 +1533,7 @@ function renderAdminPlayers() {
    ADMIN TABS
 ════════════════════════════════ */
 function showAdminTab(name,btn) {
+  if (name === 'laureando') setTimeout(lfAdminLoad, 50);
   document.querySelectorAll('.admin-tab').forEach(t=>t.style.display='none');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('adminTab-'+name).style.display='block';
