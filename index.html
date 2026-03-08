@@ -557,12 +557,14 @@ let auth         = null;
 ════════════════════════════════ */
 async function fsGet(collection, docId) {
   const r = await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`);
+  if (r.status === 429) { console.warn('Rate limit:', collection); return null; }
   if (!r.ok) return null;
   return await r.json();
 }
 
 async function fsList(collection) {
   const r = await fetch(`${BASE_URL}/${collection}?key=${API_KEY}&pageSize=200`);
+  if (r.status === 429) { console.warn('Rate limit:', collection); return []; }
   if (!r.ok) return [];
   const data = await r.json();
   return data.documents || [];
@@ -715,7 +717,12 @@ async function startApp() {
     }
     else { goTo('home'); }
     // Start polling loop
-    setInterval(pollAll, 4000);
+    const pollInterval = setInterval(() => {
+    if (!document.hidden) pollAll();
+  }, 15000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) pollAll();
+  });
   } catch(e) {
     document.getElementById('loadingMsg').textContent = '❌ Errore connessione. Ricarica la pagina.';
     console.error(e);
@@ -789,21 +796,8 @@ function lfInitForm() {
     for (let i=0;i<6;i++) lfAddRoster();
     for (let i=0;i<3;i++) lfAddBM();
   }
-  // Pre-fill if saved before
-  fsGet('laureando','profile').then(doc => {
-    if (!doc || doc.error || !doc.fields) return;
-    const d = fromFirestore(doc.fields);
-    if (d.laureandoName) document.getElementById('lf-name').value = d.laureandoName;
-    if (d.laureaDate)    document.getElementById('lf-date').value  = d.laureaDate;
-    if (d.roster && d.roster.length) {
-      rr.innerHTML = ''; lfRosterId = 0;
-      d.roster.forEach(p => lfAddRoster(p.name, p.role));
-    }
-    if (d.bonusMalus && d.bonusMalus.length) {
-      br.innerHTML = ''; lfBmId = 0;
-      d.bonusMalus.forEach(b => lfAddBM(b.name, b.points, b.emoji));
-    }
-  });
+  // Only pre-fill if form is empty
+  if (rr && rr.children.length === 0) return;
 }
 
 function lfAddRoster(name='', role='') {
