@@ -738,7 +738,7 @@ async function startApp() {
     // Start polling loop
     const pollInterval = setInterval(() => {
     if (!document.hidden) pollAll();
-  }, 15000);
+  }, 60000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) pollAll();
   });
