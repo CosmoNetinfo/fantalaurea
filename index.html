@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎓 FantaLaurea</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#07091a;--bg2:#0f1328;--card:#131830;--border:#252c55;
+      --gold:#f0c040;--gold2:#b88e18;--text:#e8e2d4;--text2:#7880a8;
+      --green:#4ade80;--red:#f87171;--blue:#60a5fa;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 15% 25%,rgba(255,255,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 38% 68%,rgba(255,255,255,.18) 0%,transparent 100%),radial-gradient(1px 1px at 55% 12%,rgba(255,255,255,.22) 0%,transparent 100%),radial-gradient(1px 1px at 72% 80%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 88% 42%,rgba(255,255,255,.15) 0%,transparent 100%);pointer-events:none;z-index:0;}
+    .container{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+    .app-header{text-align:center;padding:44px 20px 16px;position:relative;z-index:1;}
+    .app-header h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,9vw,5rem);font-weight:900;background:linear-gradient(140deg,#f0c040 0%,#fffbe0 48%,#c89520 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;letter-spacing:-.02em;}
+    .app-header .subtitle{color:var(--text2);font-size:.85rem;text-transform:uppercase;letter-spacing:.14em;margin-top:8px;}
+    .view{display:none;}.view.active{display:block;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:16px;}
+    .card-title{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);margin-bottom:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;margin-bottom:6px;font-size:.8rem;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    input[type=text],input[type=password],input[type=number],select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;}
+    input:focus,select:focus{border-color:var(--gold);}
+    select option{background:var(--bg2);}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;}
+    .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07091a;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,192,64,.28);}
+    .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-secondary{background:var(--bg2);border:1px solid var(--border);color:var(--text);}
+    .btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+    .btn-danger{background:rgba(248,113,113,.15);border:1px solid var(--red);color:var(--red);}
+    .btn-success{background:rgba(74,222,128,.15);border:1px solid var(--green);color:var(--green);}
+    .btn-full{width:100%;justify-content:center;}
+    .btn-sm{padding:7px 14px;font-size:.82rem;border-radius:8px;}
+    .roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;}
+    .roster-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center;position:relative;}
+    .roster-card:hover{border-color:var(--gold);}
+    .roster-card.selected{border-color:var(--gold);background:rgba(240,192,64,.08);}
+    .avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;font-family:'Playfair Display',serif;color:#07091a;margin:0 auto 10px;}
+    .r-name{font-weight:600;font-size:.9rem;}.r-role{color:var(--text2);font-size:.75rem;margin-top:4px;}
+    .check-mark{position:absolute;top:8px;left:8px;width:20px;height:20px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;}
+    .lb-list{display:flex;flex-direction:column;gap:9px;}
+    .lb-item{display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 18px;transition:all .25s;animation:fadeIn .3s ease;}
+    .lb-item.top-1{border-color:#f0c040;background:rgba(240,192,64,.08);}
+    .lb-item.top-2{border-color:#b0b8c8;background:rgba(176,184,200,.06);}
+    .lb-item.top-3{border-color:#cd7f32;background:rgba(205,127,50,.07);}
+    .lb-item.is-me{box-shadow:0 0 0 2px var(--gold);}
+    .lb-rank{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;min-width:34px;text-align:center;}
+    .lb-info{flex:1;}.lb-name{font-weight:600;}.lb-team{color:var(--text2);font-size:.78rem;margin-top:2px;}
+    .lb-score{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--gold);}
+    .event-log{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;}
+    .event-item{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--bg2);border-radius:9px;border-left:3px solid;animation:slideIn .28s ease;}
+    .event-item.bonus{border-color:var(--green);}.event-item.malus{border-color:var(--red);}
+    .event-pts{font-weight:700;font-family:'Playfair Display',serif;}
+    .event-pts.pos{color:var(--green);}.event-pts.neg{color:var(--red);}
+    .podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:32px 0 20px;}
+    .podium-slot{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .podium-label{font-weight:600;font-size:.88rem;max-width:100px;text-align:center;}
+    .podium-pts{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;}
+    .podium-block{width:88px;display:flex;align-items:center;justify-content:center;font-size:2rem;border-radius:8px 8px 0 0;}
+    .podium-block.p1{height:140px;background:linear-gradient(180deg,#f0c040,#b88e18);}
+    .podium-block.p2{height:100px;background:linear-gradient(180deg,#c8d0dc,#808898);}
+    .podium-block.p3{height:70px;background:linear-gradient(180deg,#cd7f32,#8a5018);}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;font-size:.82rem;font-weight:600;}
+    .badge-draft{background:rgba(96,165,250,.15);color:var(--blue);border:1px solid var(--blue);}
+    .badge-live{background:rgba(74,222,128,.15);color:var(--green);border:1px solid var(--green);}
+    .badge-finished{background:rgba(240,192,64,.15);color:var(--gold);border:1px solid var(--gold);}
+    .badge-setup{background:rgba(120,128,168,.15);color:var(--text2);border:1px solid var(--border);}
+    .pulse{animation:pulse 2s infinite;}
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+    .tab{padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:-1px;transition:all .2s;white-space:nowrap;}
+    .tab.active,.tab:hover{color:var(--gold);border-bottom-color:var(--gold);}
+    .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:.78rem;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);}
+    #playerNav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,16,36,.92);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:none;padding:10px 20px;z-index:100;}
+    #playerNav .nav-inner{display:flex;justify-content:center;gap:8px;max-width:400px;margin:0 auto;}
+    .nav-btn{flex:1;padding:9px 8px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .18s;text-align:center;}
+    .nav-btn.active,.nav-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.08);}
+    .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+    .section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:10px;}
+    .empty-state{text-align:center;padding:28px;color:var(--text2);font-size:.9rem;}
+    .text-center{text-align:center;}.text-gold{color:var(--gold);}.text-green{color:var(--green);}.text-red{color:var(--red);}.text-muted{color:var(--text2);}
+    .mt-1{margin-top:6px;}.mt-2{margin-top:10px;}.mt-3{margin-top:16px;}.mt-4{margin-top:24px;}
+    .flex{display:flex;}.gap-2{gap:8px;}.flex-wrap{flex-wrap:wrap;}.align-center{align-items:center;}.justify-between{justify-content:space-between;}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+    .toast{position:fixed;bottom:88px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 20px;font-size:.88rem;z-index:999;transform:translateX(160%);transition:transform .3s;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+    .toast.show{transform:translateX(0);}.toast.success{border-color:var(--green);}.toast.error{border-color:var(--red);}
+    .bm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+    .bm-assign-btn{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:9px;border:1px solid;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;}
+    .bm-assign-btn.bonus{border-color:var(--green);color:var(--green);background:rgba(74,222,128,.08);}
+    .bm-assign-btn.bonus:hover{background:rgba(74,222,128,.18);}
+    .bm-assign-btn.malus{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.08);}
+    .bm-assign-btn.malus:hover{background:rgba(248,113,113,.18);}
+    .row-list-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+    .row-list-item:last-child{border-bottom:none;}
+    .confetti-piece{position:fixed;top:-20px;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:999;animation:confetti-fall linear forwards;}
+    #loadingOverlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px;}
+    #loadingOverlay h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.6rem;}
+    #loadingOverlay p{color:var(--text2);font-size:.9rem;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    @media(max-width:580px){.form-row{grid-template-columns:1fr}.roster-grid{grid-template-columns:repeat(2,1fr)}.podium-block{width:72px}}
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <h2>🎓 FantaLaurea</h2>
+  <p id="loadingMsg">Connessione a Firebase…</p>
+</div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <h1>🎓 FantaLaurea</h1>
+  <p class="subtitle" id="gameNameDisplay">Il gioco della laurea</p>
+</div>
+
+<!-- VIEW: HOME -->
+<div id="view-home" class="view">
+  <div class="container">
+    <div class="card" style="max-width:440px;margin:0 auto;">
+      <h2 class="card-title">Entra nel gioco</h2>
+      <p class="text-muted mt-1" style="margin-bottom:20px;font-size:.9rem;">Scegli un nickname per partecipare</p>
+      <div class="form-group">
+        <label>Il tuo nickname</label>
+        <input type="text" id="nicknameInput" placeholder="es. ZioMario, ProfBianchi…" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
+      </div>
+      <button class="btn btn-primary btn-full mt-3" onclick="joinGame()">🎯 Partecipa</button>
+      <hr class="divider">
+      <div class="text-center">
+        <button class="btn btn-secondary btn-sm" onclick="toggleAdminLogin()">🔐 Accesso Admin</button>
+      </div>
+    </div>
+    <div id="adminLoginCard" class="card" style="max-width:440px;margin:0 auto;display:none;">
+      <h2 class="card-title">Pannello Admin</h2>
+      <div class="form-group mt-2">
+        <label>Password Admin</label>
+        <input type="password" id="adminPwdInput" placeholder="Password…" onkeydown="if(event.key==='Enter')loginAdmin()">
+      </div>
+      <button class="btn btn-primary btn-full mt-2" onclick="loginAdmin()">🔐 Accedi</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: DRAFT -->
+<div id="view-draft" class="view">
+  <div class="container">
+    <div class="flex align-center justify-between" style="margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);">Scegli la tua squadra</h2>
+        <p class="text-muted mt-1">Seleziona <strong id="teamSizeLabel">3</strong> persone dal roster</p>
+      </div>
+    </div>
+    <div id="draftWaiting" class="card text-center" style="display:none;">
+      <div class="spinner" style="margin:0 auto 16px;"></div>
+      <p id="draftWaitMsg">Il draft non è ancora aperto.</p>
+      <p class="text-muted mt-2">L'admin aprirà il draft a breve…</p>
+    </div>
+    <div id="draftDone" class="card text-center" style="display:none;">
+      <div style="font-size:3rem;">✅</div>
+      <h3 style="color:var(--green);font-family:'Playfair Display',serif;margin-top:12px;">Squadra inviata!</h3>
+      <p class="text-muted mt-2">La tua squadra è stata registrata. Aspetta l'inizio!</p>
+      <div id="draftDoneTeam" class="flex gap-2 flex-wrap mt-3" style="justify-content:center;"></div>
+    </div>
+    <div id="draftOpen" style="display:none;">
+      <div id="selectedBar" class="card" style="display:none;padding:16px 24px;">
+        <p class="section-label">La tua squadra</p>
+        <div id="selectedBarList" class="flex gap-2 flex-wrap"></div>
+      </div>
+      <div class="card">
+        <p class="section-label">Roster completo</p>
+        <div id="draftRosterGrid" class="roster-grid"></div>
+      </div>
+      <button id="confirmTeamBtn" class="btn btn-primary btn-full mt-3" onclick="submitTeam()" disabled>
+        ✨ Conferma Squadra
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: LIVE -->
+<div id="view-live" class="view">
+  <div class="container">
+    <div class="flex align-center gap-2" style="margin-bottom:20px;flex-wrap:wrap;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);">Classifica Live</h2>
+      <span class="badge badge-live"><span class="pulse">●</span> LIVE</span>
+    </div>
+    <div class="card" style="border-color:var(--gold);">
+      <div class="flex align-center justify-between">
+        <div><p class="section-label">La tua posizione</p><p id="myRank" style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;">—</p></div>
+        <div style="text-align:right;"><p class="section-label">I tuoi punti</p><p id="myScore" style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold);line-height:1;">0</p></div>
+      </div>
+      <hr class="divider">
+      <p class="section-label">La tua squadra</p>
+      <div id="myTeamLive" class="flex gap-2 flex-wrap"></div>
+    </div>
+    <div class="card mt-3"><p class="section-label">Classifica</p><div id="liveLeaderboard" class="lb-list"></div></div>
+    <div class="card mt-3"><p class="section-label">Ultimi eventi</p><div id="eventLog" class="event-log"><div class="empty-state">Nessun evento ancora…</div></div></div>
+  </div>
+</div>
+
+<!-- VIEW: LEADERBOARD -->
+<div id="view-leaderboard" class="view">
+  <div class="container text-center">
+    <h2 style="font-family:'Playfair Display',serif;font-size:2.6rem;color:var(--gold);">🏆 Classifica Finale</h2>
+    <p class="text-muted mt-2">La FantaLaurea è terminata!</p>
+    <div id="podiumArea" class="mt-4"></div>
+    <div class="card mt-4" style="text-align:left;"><p class="section-label">Classifica completa</p><div id="finalLeaderboard" class="lb-list"></div></div>
+  </div>
+</div>
+
+<!-- VIEW: ADMIN -->
+<div id="view-admin" class="view">
+  <div class="container">
+    <div class="flex align-center justify-between" style="margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);">🔐 Pannello Admin</h2>
+        <div id="adminStatusBadge" class="mt-1"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="adminLogout()">Esci</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="showAdminTab('setup',this)">⚙️ Setup</button>
+      <button class="tab" onclick="showAdminTab('roster',this)">👥 Roster</button>
+      <button class="tab" onclick="showAdminTab('bm',this)">⚡ Bonus/Malus</button>
+      <button class="tab" onclick="showAdminTab('game',this)">🎮 Gioco</button>
+      <button class="tab" onclick="showAdminTab('players',this)">📊 Giocatori</button>
+    </div>
+
+    <div id="adminTab-setup" class="admin-tab">
+      <div class="card">
+        <h2 class="card-title">Configurazione partita</h2>
+        <div class="form-group mt-2"><label>Nome della partita</label><input type="text" id="cfgGameName" placeholder="es. Fantalaurea di Marco – 15 Luglio"></div>
+        <div class="form-group"><label>Persone per squadra</label><input type="number" id="cfgTeamSize" value="3" min="1" max="10"></div>
+        <div class="form-group"><label>Password Admin</label><input type="password" id="cfgAdminPwd" placeholder="Nuova password…"></div>
+        <button class="btn btn-primary mt-2" onclick="saveConfig()">💾 Salva</button>
+      </div>
+    </div>
+
+    <div id="adminTab-roster" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Aggiungi persona al roster</h2>
+        <div class="form-row mt-2">
+          <div class="form-group"><label>Nome</label><input type="text" id="rosterName" placeholder="Prof. Rossi"></div>
+          <div class="form-group"><label>Ruolo</label><input type="text" id="rosterRole" placeholder="es. Relatore, Papà…"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addRosterMember()">➕ Aggiungi</button>
+      </div>
+      <div class="card mt-3"><h2 class="card-title">Roster attuale</h2><div id="adminRosterList" class="mt-2"></div></div>
+    </div>
+
+    <div id="adminTab-bm" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Aggiungi Bonus/Malus</h2>
+        <div class="form-row mt-2">
+          <div class="form-group"><label>Nome evento</label><input type="text" id="bmName" placeholder="es. Risposta perfetta"></div>
+          <div class="form-group"><label>Punti (negativo = malus)</label><input type="number" id="bmPts" placeholder="5 oppure -3"></div>
+        </div>
+        <div class="form-group"><label>Emoji</label><input type="text" id="bmEmoji" placeholder="⭐" maxlength="2" style="max-width:100px;"></div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm" onclick="addBM()">➕ Aggiungi</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadDefaultBM()">📋 Carica preset</button>
+        </div>
+      </div>
+      <div class="card mt-3"><h2 class="card-title">Elenco Bonus/Malus</h2><div id="adminBMList" class="mt-2"></div></div>
+    </div>
+
+    <div id="adminTab-game" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Controllo partita</h2>
+        <div class="flex gap-2 flex-wrap mt-2">
+          <button class="btn btn-secondary btn-sm" onclick="setStatus('setup')">⚙️ Setup</button>
+          <button class="btn btn-success btn-sm" onclick="setStatus('draft')">📝 Apri Draft</button>
+          <button class="btn btn-primary btn-sm" onclick="setStatus('live')">🚀 Inizia Gioco</button>
+          <button class="btn btn-secondary btn-sm" onclick="setStatus('finished')">🏁 Termina</button>
+        </div>
+      </div>
+      <div class="card mt-3">
+        <h2 class="card-title">⚡ Assegna evento</h2>
+        <div class="form-group"><label>Persona</label><select id="eventPersonSelect"><option value="">— Seleziona —</option></select></div>
+        <p class="section-label mt-3">Bonus</p><div id="bmBonusGrid" class="bm-grid"></div>
+        <p class="section-label mt-3">Malus</p><div id="bmMalusGrid" class="bm-grid"></div>
+        <div id="recentEventsAdmin" class="mt-4"></div>
+      </div>
+    </div>
+
+    <div id="adminTab-players" class="admin-tab" style="display:none;">
+      <div class="card"><h2 class="card-title">Giocatori (<span id="playerCount">0</span>)</h2><div id="adminPlayersList" class="mt-2"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="playerNav">
+  <div class="nav-inner">
+    <button class="nav-btn" id="nav-draft" onclick="goTo('draft')">📝 Draft</button>
+    <button class="nav-btn" id="nav-live" onclick="goTo('live')">🔴 Live</button>
+    <button class="nav-btn" id="nav-leaderboard" onclick="goTo('leaderboard')">🏆 Classifica</button>
+    <button class="nav-btn" id="nav-adminquick" onclick="showQuickAdmin()" style="max-width:44px;">🔐</button>
+  </div>
+</div>
+
+<!-- Quick admin login popup -->
+<div id="quickAdminPopup" style="display:none;position:fixed;bottom:70px;right:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;z-index:200;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+  <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em;">Password Admin</p>
+  <input type="password" id="quickAdminPwd" placeholder="Password…" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;margin-bottom:8px;" onkeydown="if(event.key==='Enter')quickLoginAdmin()">
+  <div style="display:flex;gap:6px;">
+    <button class="btn btn-primary btn-sm" style="flex:1;" onclick="quickLoginAdmin()">Accedi</button>
+    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('quickAdminPopup').style.display='none'">✕</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   CONFIG FIREBASE
+════════════════════════════════ */
+const PROJECT_ID  = "fantalaurea-a38df";
+const API_KEY     = "AIzaSyCeBj5l1G-RDkFn22ogMqn8g6YydRsIg4E";
+const BASE_URL    = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+let currentNick = null;
+let isAdmin     = false;
+let gameConfig  = { name:'FantaLaurea', teamSize:3, adminPassword:'admin123', status:'setup' };
+let roster      = {};
+let bonusMalus  = {};
+let players     = {};
+let events      = [];
+let selectedTeam = [];
+let currentView  = '';
+
+/* ════════════════════════════════
+   FIRESTORE REST HELPERS
+════════════════════════════════ */
+async function fsGet(collection, docId) {
+  const r = await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`);
+  if (!r.ok) return null;
+  return await r.json();
+}
+
+async function fsList(collection) {
+  const r = await fetch(`${BASE_URL}/${collection}?key=${API_KEY}&pageSize=200`);
+  if (!r.ok) return [];
+  const data = await r.json();
+  return data.documents || [];
+}
+
+async function fsSet(collection, docId, fields) {
+  const body = { fields: toFirestore(fields) };
+  const r = await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`, {
+    method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+async function fsAdd(collection, fields) {
+  const body = { fields: toFirestore(fields) };
+  const r = await fetch(`${BASE_URL}/${collection}?key=${API_KEY}&documentId=${Date.now()}_${Math.random().toString(36).slice(2,7)}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+async function fsDelete(collection, docId) {
+  await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`, { method:'DELETE' });
+}
+
+async function fsUpdate(collection, docId, fields) {
+  const existing = await fsGet(collection, docId);
+  let merged = {};
+  if (existing && existing.fields) merged = fromFirestore(existing.fields);
+  Object.assign(merged, fields);
+  return fsSet(collection, docId, merged);
+}
+
+// Convert JS object to Firestore format
+function toFirestore(obj) {
+  const out = {};
+  for (const [k,v] of Object.entries(obj)) {
+    if (v === null || v === undefined) { out[k] = {nullValue:null}; }
+    else if (typeof v === 'boolean') { out[k] = {booleanValue:v}; }
+    else if (typeof v === 'number')  { out[k] = {integerValue:String(v)}; }
+    else if (typeof v === 'string')  { out[k] = {stringValue:v}; }
+    else if (Array.isArray(v))       { out[k] = {arrayValue:{values:v.map(x=>({stringValue:String(x)}))}}; }
+    else { out[k] = {stringValue:JSON.stringify(v)}; }
+  }
+  return out;
+}
+
+// Convert Firestore fields to JS object
+function fromFirestore(fields) {
+  if (!fields) return {};
+  const out = {};
+  for (const [k,v] of Object.entries(fields)) {
+    if (v.stringValue  !== undefined) out[k] = v.stringValue;
+    else if (v.integerValue !== undefined) out[k] = parseInt(v.integerValue);
+    else if (v.doubleValue  !== undefined) out[k] = parseFloat(v.doubleValue);
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.nullValue    !== undefined) out[k] = null;
+    else if (v.arrayValue) {
+      out[k] = (v.arrayValue.values || []).map(x =>
+        x.stringValue ?? x.integerValue ?? x.booleanValue ?? null
+      );
+    }
+    else out[k] = null;
+  }
+  return out;
+}
+
+function docId(doc) {
+  return doc.name.split('/').pop();
+}
+
+/* ════════════════════════════════
+   POLLING (ogni 4 secondi)
+════════════════════════════════ */
+async function pollAll() {
+  try {
+    // Config
+    const cfgDoc = await fsGet('game', 'config');
+    if (cfgDoc && cfgDoc.fields) {
+      gameConfig = fromFirestore(cfgDoc.fields);
+      document.getElementById('gameNameDisplay').textContent = gameConfig.name || 'Il gioco della laurea';
+      document.getElementById('teamSizeLabel').textContent = gameConfig.teamSize || 3;
+      if (document.getElementById('cfgGameName')) document.getElementById('cfgGameName').value = gameConfig.name || '';
+      if (document.getElementById('cfgTeamSize')) document.getElementById('cfgTeamSize').value = gameConfig.teamSize || 3;
+      updateAdminStatusBadge();
+    }
+
+    // Roster
+    const rosterDocs = await fsList('roster');
+    roster = {};
+    rosterDocs.forEach(d => { roster[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+
+    // BonusMalus
+    const bmDocs = await fsList('bonusMalus');
+    bonusMalus = {};
+    bmDocs.forEach(d => { bonusMalus[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+
+    // Players
+    const playerDocs = await fsList('players');
+    players = {};
+    playerDocs.forEach(d => { players[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+    document.getElementById('playerCount').textContent = Object.keys(players).length;
+
+    // Events (last 20)
+    const evDocs = await fsList('events');
+    events = evDocs.map(d => ({id:docId(d), ...fromFirestore(d.fields)}))
+      .sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0,20);
+
+    // Re-render current view
+    renderCurrentView();
+  } catch(e) { /* silently ignore poll errors */ }
+}
+
+function renderCurrentView() {
+  if (currentView === 'draft')       renderDraftView();
+  if (currentView === 'live')        { renderLeaderboards(); updateLiveView(); }
+  if (currentView === 'leaderboard') renderFinalLeaderboard();
+  if (currentView === 'admin') {
+    renderAdminRoster(); renderAdminBM();
+    renderAdminPlayers(); populatePersonSelect();
+    renderBMButtons(); renderRecentEventsAdmin();
+  }
+}
+
+/* ════════════════════════════════
+   STARTUP
+════════════════════════════════ */
+async function startApp() {
+  document.getElementById('loadingMsg').textContent = 'Caricamento dati…';
+  try {
+    await pollAll();
+    document.getElementById('loadingOverlay').style.display = 'none';
+    // Session restore
+    const savedAdmin = localStorage.getItem('fl_admin');
+    const savedNick  = localStorage.getItem('fl_nick');
+    if (savedAdmin === 'true') { isAdmin = true; goTo('admin'); }
+    else if (savedNick) { currentNick = savedNick; document.getElementById('playerNav').style.display = 'block'; goTo('live'); }
+    else { goTo('home'); }
+    // Start polling loop
+    setInterval(pollAll, 4000);
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = '❌ Errore connessione. Ricarica la pagina.';
+    console.error(e);
+  }
+}
+
+window.onload = startApp;
+
+/* ════════════════════════════════
+   VIEW ROUTING
+════════════════════════════════ */
+function goTo(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  currentView = name;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + name);
+  if (nb) nb.classList.add('active');
+  window.scrollTo(0,0);
+  renderCurrentView();
+}
+
+/* ════════════════════════════════
+   HOME
+════════════════════════════════ */
+function toggleAdminLogin() {
+  const el = document.getElementById('adminLoginCard');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function joinGame() {
+  const nick = document.getElementById('nicknameInput').value.trim();
+  if (!nick || nick.length < 2) { toast('Inserisci un nickname (min 2 caratteri)', 'error'); return; }
+  const btn = document.querySelector('#view-home .btn-primary');
+  btn.textContent = '⏳ Connessione…'; btn.disabled = true;
+  try {
+    currentNick = nick;
+    localStorage.setItem('fl_nick', nick);
+    const existing = await fsGet('players', nick);
+    if (!existing || existing.error) {
+      await fsSet('players', nick, { nickname:nick, team:[], score:0, ts:Date.now() });
+    }
+    document.getElementById('playerNav').style.display = 'block';
+    await pollAll();
+    goTo('draft');
+  } catch(e) {
+    toast('Errore connessione: ' + e.message, 'error');
+    btn.textContent = '🎯 Partecipa'; btn.disabled = false;
+  }
+}
+
+async function loginAdmin() {
+  const pwd  = document.getElementById('adminPwdInput').value;
+  const corr = gameConfig.adminPassword || 'admin123';
+  if (pwd === corr) { isAdmin = true; localStorage.setItem('fl_admin','true'); goTo('admin'); }
+  else toast('Password errata!', 'error');
+}
+
+function adminLogout() {
+  isAdmin = false; localStorage.removeItem('fl_admin'); goTo('home');
+}
+
+function showQuickAdmin() {
+  const popup = document.getElementById('quickAdminPopup');
+  popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+  if (popup.style.display === 'block') document.getElementById('quickAdminPwd').focus();
+}
+
+async function quickLoginAdmin() {
+  const pwd  = document.getElementById('quickAdminPwd').value;
+  const corr = gameConfig.adminPassword || 'admin123';
+  if (pwd === corr) {
+    isAdmin = true;
+    localStorage.setItem('fl_admin','true');
+    document.getElementById('quickAdminPopup').style.display = 'none';
+    document.getElementById('quickAdminPwd').value = '';
+    goTo('admin');
+  } else {
+    toast('Password errata!','error');
+  }
+}
+
+/* ════════════════════════════════
+   DRAFT
+════════════════════════════════ */
+function renderDraftView() {
+  const status   = gameConfig.status || 'setup';
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  const player   = currentNick ? players[currentNick] : null;
+  document.getElementById('draftWaiting').style.display = 'none';
+  document.getElementById('draftDone').style.display    = 'none';
+  document.getElementById('draftOpen').style.display    = 'none';
+
+  if (player && player.team && player.team.length > 0) {
+    document.getElementById('draftDone').style.display = 'block';
+    document.getElementById('draftDoneTeam').innerHTML =
+      player.team.map(id => { const m=roster[id]; return m?`<span class="chip">✓ ${m.name}</span>`:''; }).join('');
+    return;
+  }
+  if (status === 'setup' || status === 'finished' || status === 'live') {
+    document.getElementById('draftWaiting').style.display = 'block';
+    document.getElementById('draftWaitMsg').textContent =
+      status==='finished' ? 'La partita è terminata.' :
+      status==='live'     ? 'Il draft è chiuso — partita in corso!' :
+                            'Il draft non è ancora aperto.';
+    return;
+  }
+  // draft open
+  document.getElementById('draftOpen').style.display = 'block';
+  const grid    = document.getElementById('draftRosterGrid');
+  const members = Object.values(roster);
+  grid.innerHTML = !members.length
+    ? '<div class="empty-state">Nessuna persona nel roster ancora.</div>'
+    : members.map(m => {
+        const sel = selectedTeam.includes(m.id);
+        return `<div class="roster-card ${sel?'selected':''}" onclick="toggleMember('${m.id}')">
+          ${sel?'<div class="check-mark">✓</div>':''}
+          <div class="avatar">${initials(m.name)}</div>
+          <div class="r-name">${m.name}</div>
+          <div class="r-role">${m.role||''}</div>
+        </div>`;
+      }).join('');
+
+  const bar = document.getElementById('selectedBar');
+  if (selectedTeam.length > 0) {
+    bar.style.display = 'block';
+    document.getElementById('selectedBarList').innerHTML =
+      selectedTeam.map(id => { const m=roster[id]; return m?`<span class="chip">✓ ${m.name}</span>`:''; }).join('');
+  } else bar.style.display = 'none';
+
+  const btn = document.getElementById('confirmTeamBtn');
+  btn.disabled = selectedTeam.length !== teamSize;
+  btn.textContent = selectedTeam.length === teamSize
+    ? '✨ Conferma Squadra'
+    : `Seleziona ancora ${teamSize - selectedTeam.length}`;
+}
+
+function toggleMember(id) {
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  if (selectedTeam.includes(id)) { selectedTeam = selectedTeam.filter(x=>x!==id); }
+  else {
+    if (selectedTeam.length >= teamSize) { toast(`Max ${teamSize} persone!`,'error'); return; }
+    selectedTeam.push(id);
+  }
+  renderDraftView();
+}
+
+async function submitTeam() {
+  if (!currentNick) return;
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  if (selectedTeam.length !== teamSize) { toast(`Seleziona esattamente ${teamSize} persone`,'error'); return; }
+  await fsUpdate('players', currentNick, { team: selectedTeam });
+  toast('Squadra confermata! 🎉','success');
+  await pollAll();
+  renderDraftView();
+}
+
+/* ════════════════════════════════
+   LIVE
+════════════════════════════════ */
+function updateLiveView() {
+  if (!currentNick) return;
+  const player = players[currentNick];
+  if (!player) return;
+  const sorted = sortedPlayers();
+  const rank   = sorted.findIndex(p => p.id === currentNick) + 1;
+  document.getElementById('myRank').textContent  = rank > 0 ? `${rankEmoji(rank)} #${rank}` : '—';
+  document.getElementById('myScore').textContent = player.score || 0;
+  const teamEl = document.getElementById('myTeamLive');
+  if (player.team && player.team.length > 0) {
+    teamEl.innerHTML = player.team.map(id => {
+      const m = roster[id];
+      return m ? `<span class="chip">${m.name} <strong>${m.totalPoints||0}pt</strong></span>` : '';
+    }).join('');
+  } else teamEl.innerHTML = '<span class="text-muted" style="font-size:.85rem;">Nessuna squadra</span>';
+}
+
+function renderLeaderboards() {
+  const sorted = sortedPlayers();
+  const el = document.getElementById('liveLeaderboard');
+  if (el) el.innerHTML = sorted.map((p,i) => lbItem(p,i+1)).join('');
+  renderEventLog();
+}
+
+function lbItem(p, rank) {
+  const names = (p.team||[]).map(id=>roster[id]?.name||'?').join(', ');
+  const isMe  = p.id === currentNick;
+  return `<div class="lb-item ${rank<=3?'top-'+rank:''} ${isMe?'is-me':''}">
+    <div class="lb-rank">${rankEmoji(rank)}</div>
+    <div class="lb-info">
+      <div class="lb-name">${p.nickname||p.id}${isMe?' <span class="chip" style="font-size:.7rem;padding:2px 7px;">Tu</span>':''}</div>
+      <div class="lb-team">${names||'Nessuna squadra'}</div>
+    </div>
+    <div class="lb-score">${p.score||0}</div>
+  </div>`;
+}
+
+function renderEventLog() {
+  const el = document.getElementById('eventLog');
+  if (!el) return;
+  if (!events.length) { el.innerHTML='<div class="empty-state">Nessun evento ancora…</div>'; return; }
+  el.innerHTML = events.map(e => {
+    const bonus = Number(e.points) > 0;
+    return `<div class="event-item ${bonus?'bonus':'malus'}">
+      <span style="font-size:1.2rem;">${e.emoji||''}</span>
+      <span style="flex:1;font-size:.88rem;"><strong>${e.rosterName}</strong> — ${e.eventName}</span>
+      <span class="event-pts ${bonus?'pos':'neg'}">${bonus?'+':''}${e.points}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════
+   LEADERBOARD FINALE
+════════════════════════════════ */
+function renderFinalLeaderboard() {
+  const sorted = sortedPlayers();
+  const podiumEl = document.getElementById('podiumArea');
+  if (sorted.length >= 3) {
+    const [g,s,b] = sorted;
+    podiumEl.innerHTML = `<div class="podium">
+      <div class="podium-slot"><div class="podium-label">${s.nickname||s.id}</div><div class="podium-pts" style="color:#b0b8c8;">${s.score||0}pt</div><div class="podium-block p2">🥈</div></div>
+      <div class="podium-slot"><div class="podium-label">${g.nickname||g.id}</div><div class="podium-pts" style="color:var(--gold);">${g.score||0}pt</div><div class="podium-block p1">🥇</div></div>
+      <div class="podium-slot"><div class="podium-label">${b.nickname||b.id}</div><div class="podium-pts" style="color:#cd7f32;">${b.score||0}pt</div><div class="podium-block p3">🥉</div></div>
+    </div>`;
+    launchConfetti();
+  } else podiumEl.innerHTML = '<div class="empty-state">Servono almeno 3 giocatori per il podio.</div>';
+  document.getElementById('finalLeaderboard').innerHTML = sorted.map((p,i)=>lbItem(p,i+1)).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – CONFIG
+════════════════════════════════ */
+async function saveConfig() {
+  const name   = document.getElementById('cfgGameName').value.trim() || 'FantaLaurea';
+  const size   = parseInt(document.getElementById('cfgTeamSize').value) || 3;
+  const newPwd = document.getElementById('cfgAdminPwd').value;
+  const data   = { name, teamSize:size, status: gameConfig.status||'setup' };
+  if (newPwd) data.adminPassword = newPwd;
+  await fsSet('game','config',data);
+  toast('Salvato!','success');
+  await pollAll();
+}
+
+async function setStatus(s) {
+  await fsUpdate('game','config',{ status:s });
+  toast('Stato → ' + s,'success');
+  await pollAll();
+}
+
+function updateAdminStatusBadge() {
+  const el = document.getElementById('adminStatusBadge');
+  if (!el) return;
+  const map = { setup:['setup','⚙️ Setup'], draft:['draft','📝 Draft aperto'], live:['live','🔴 Gioco in corso'], finished:['finished','🏁 Terminato'] };
+  const s = gameConfig.status || 'setup';
+  const [cls,label] = map[s] || ['setup',s];
+  el.innerHTML = `<span class="badge badge-${cls}">${label}</span>`;
+}
+
+/* ════════════════════════════════
+   ADMIN – ROSTER
+════════════════════════════════ */
+async function addRosterMember() {
+  const name = document.getElementById('rosterName').value.trim();
+  const role = document.getElementById('rosterRole').value.trim();
+  if (!name) { toast('Inserisci un nome!','error'); return; }
+  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+  await fsSet('roster', id, { name, role, totalPoints:0 });
+  document.getElementById('rosterName').value = '';
+  document.getElementById('rosterRole').value = '';
+  toast('Aggiunto: ' + name,'success');
+  await pollAll();
+}
+
+async function deleteRosterMember(id) {
+  if (confirm('Rimuovere questa persona?')) {
+    await fsDelete('roster', id);
+    toast('Rimosso','success');
+    await pollAll();
+  }
+}
+
+function renderAdminRoster() {
+  const el = document.getElementById('adminRosterList');
+  if (!el) return;
+  const members = Object.values(roster);
+  el.innerHTML = !members.length
+    ? '<div class="empty-state">Nessuna persona aggiunta</div>'
+    : members.map(m=>`<div class="row-list-item">
+        <div class="avatar" style="width:36px;height:36px;min-width:36px;font-size:.85rem;">${initials(m.name)}</div>
+        <div style="flex:1;"><div style="font-weight:600;">${m.name}</div><div class="text-muted" style="font-size:.78rem;">${m.role||''} · ${m.totalPoints||0} punti</div></div>
+        <button class="btn btn-danger btn-sm" onclick="deleteRosterMember('${m.id}')">✕</button>
+      </div>`).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – BONUS/MALUS
+════════════════════════════════ */
+const DEFAULTS = [
+  {name:'Lode!',points:10,emoji:'🌟'},{name:'Risposta perfetta',points:5,emoji:'⭐'},
+  {name:'Applauso spontaneo',points:8,emoji:'👏'},{name:'Battuta che fa ridere la commissione',points:6,emoji:'😂'},
+  {name:'Risponde senza esitare',points:4,emoji:'🎯'},{name:'Stretta di mano del rettore',points:7,emoji:'🤝'},
+  {name:'Primo a fare gli auguri',points:3,emoji:'💐'},{name:'Primo brindisi',points:5,emoji:'🥂'},
+  {name:'Citazione del professore',points:5,emoji:'📚'},{name:'Piange (di gioia)',points:6,emoji:'😭'},
+  {name:'Momento di panico',points:-5,emoji:'😅'},{name:'Telefono suona in aula',points:-8,emoji:'📵'},
+  {name:'Risposta sbagliata',points:-4,emoji:'❌'},{name:'Supera il tempo',points:-3,emoji:'⏰'},
+  {name:'Arriva in ritardo',points:-7,emoji:'🚗'},{name:'Prof si addormenta',points:-6,emoji:'😴'},
+];
+
+async function loadDefaultBM() {
+  for (const bm of DEFAULTS) {
+    const id = bm.name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, bm);
+  }
+  toast('Preset caricato!','success');
+  await pollAll();
+}
+
+async function addBM() {
+  const name  = document.getElementById('bmName').value.trim();
+  const pts   = parseInt(document.getElementById('bmPts').value);
+  const emoji = document.getElementById('bmEmoji').value.trim() || (pts>0?'⭐':'💥');
+  if (!name || isNaN(pts)) { toast('Compila nome e punti','error'); return; }
+  const id = name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') + '_' + Date.now();
+  await fsSet('bonusMalus', id, {name,points:pts,emoji});
+  document.getElementById('bmName').value = '';
+  document.getElementById('bmPts').value  = '';
+  document.getElementById('bmEmoji').value = '';
+  toast('Aggiunto!','success');
+  await pollAll();
+}
+
+async function deleteBM(id) {
+  await fsDelete('bonusMalus', id);
+  await pollAll();
+}
+
+function renderAdminBM() {
+  const el = document.getElementById('adminBMList');
+  if (!el) return;
+  const items = Object.values(bonusMalus).sort((a,b)=>b.points-a.points);
+  el.innerHTML = !items.length
+    ? '<div class="empty-state">Nessun bonus/malus aggiunto</div>'
+    : items.map(bm=>{
+        const pos = Number(bm.points)>0;
+        return `<div class="row-list-item">
+          <span style="font-size:1.3rem;">${bm.emoji}</span>
+          <div style="flex:1;"><span style="font-weight:600;">${bm.name}</span>
+          <span class="${pos?'text-green':'text-red'}" style="margin-left:8px;font-weight:700;">${pos?'+':''}${bm.points}pt</span></div>
+          <button class="btn btn-danger btn-sm" onclick="deleteBM('${bm.id}')">✕</button>
+        </div>`;
+      }).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – ASSIGN EVENT
+════════════════════════════════ */
+function populatePersonSelect() {
+  const sel = document.getElementById('eventPersonSelect');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Seleziona persona —</option>' +
+    Object.values(roster).map(m=>`<option value="${m.id}" ${m.id===prev?'selected':''}>${m.name} (${m.role||'N/D'})</option>`).join('');
+}
+
+function renderBMButtons() {
+  const bonusEl = document.getElementById('bmBonusGrid');
+  const malusEl = document.getElementById('bmMalusGrid');
+  if (!bonusEl||!malusEl) return;
+  const bonus = Object.values(bonusMalus).filter(b=>Number(b.points)>0).sort((a,b)=>b.points-a.points);
+  const malus = Object.values(bonusMalus).filter(b=>Number(b.points)<0).sort((a,b)=>a.points-b.points);
+  const btnHtml = (bm,cls) => `<button class="bm-assign-btn ${cls}" onclick="assignEvent('${bm.id}')">
+    <span>${bm.emoji} ${bm.name}</span><strong>${Number(bm.points)>0?'+':''}${bm.points}pt</strong>
+  </button>`;
+  bonusEl.innerHTML = bonus.length ? bonus.map(b=>btnHtml(b,'bonus')).join('') : '<div class="empty-state">Nessun bonus</div>';
+  malusEl.innerHTML = malus.length ? malus.map(b=>btnHtml(b,'malus')).join('') : '<div class="empty-state">Nessun malus</div>';
+}
+
+async function assignEvent(bmId) {
+  const rosterId = document.getElementById('eventPersonSelect').value;
+  if (!rosterId) { toast('Seleziona prima una persona!','error'); return; }
+  const bm = bonusMalus[bmId];
+  const person = roster[rosterId];
+  if (!bm||!person) return;
+
+  const pts = Number(bm.points);
+
+  // Save event
+  await fsAdd('events', {
+    rosterId, rosterName:person.name,
+    bonusId:bmId, eventName:bm.name,
+    emoji:bm.emoji, points:pts, ts:Date.now()
+  });
+
+  // Update roster member total
+  const newTotal = Number(person.totalPoints||0) + pts;
+  await fsUpdate('roster', rosterId, { totalPoints: newTotal });
+
+  // Update players who have this person
+  for (const p of Object.values(players)) {
+    const team = p.team || [];
+    if (team.includes(rosterId)) {
+      const newScore = Number(p.score||0) + pts;
+      await fsUpdate('players', p.id, { score: newScore });
+    }
+  }
+
+  toast(`${bm.emoji} ${bm.name} → ${person.name} (${pts>0?'+':''}${pts}pt)`,'success');
+  await pollAll();
+}
+
+function renderRecentEventsAdmin() {
+  const el = document.getElementById('recentEventsAdmin');
+  if (!el||!events.length) return;
+  el.innerHTML = `<p class="section-label mt-3">Ultimi eventi assegnati</p>` +
+    events.slice(0,6).map(e=>`<div class="row-list-item" style="font-size:.85rem;">
+      <span>${e.emoji}</span>
+      <span style="flex:1;"><strong>${e.rosterName}</strong> — ${e.eventName}</span>
+      <span class="${Number(e.points)>0?'text-green':'text-red'}">${Number(e.points)>0?'+':''}${e.points}</span>
+    </div>`).join('');
+}
+
+function renderAdminPlayers() {
+  const el = document.getElementById('adminPlayersList');
+  if (!el) return;
+  const sorted = sortedPlayers();
+  el.innerHTML = !sorted.length
+    ? '<div class="empty-state">Nessun giocatore ancora</div>'
+    : sorted.map((p,i)=>`<div class="row-list-item">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;min-width:28px;">${rankEmoji(i+1)}</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">${p.nickname||p.id}</div>
+          <div class="text-muted" style="font-size:.78rem;">${(p.team||[]).map(id=>roster[id]?.name||'?').join(', ')||'Nessuna squadra'}</div>
+        </div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);">${p.score||0}pt</div>
+      </div>`).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN TABS
+════════════════════════════════ */
+function showAdminTab(name,btn) {
+  document.querySelectorAll('.admin-tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('adminTab-'+name).style.display='block';
+  if (btn) btn.classList.add('active');
+}
+
+/* ════════════════════════════════
+   CONFETTI
+════════════════════════════════ */
+function launchConfetti() {
+  const colors=['#f0c040','#fff','#4ade80','#60a5fa','#f87171','#c084fc'];
+  for (let i=0;i<60;i++) {
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.width=(6+Math.random()*8)+'px';
+    el.style.height=(6+Math.random()*8)+'px';
+    el.style.animationDuration=(2+Math.random()*3)+'s';
+    el.style.animationDelay=(Math.random()*1.5)+'s';
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+function sortedPlayers(){return Object.values(players).sort((a,b)=>(b.score||0)-(a.score||0));}
+function initials(name){if(!name)return'?';return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function rankEmoji(r){if(r===1)return'🥇';if(r===2)return'🥈';if(r===3)return'🥉';return`#${r}`;}
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`toast ${type} show`;
+  setTimeout(()=>{el.className='toast';},3000);
+}
+</script>
+</body>
+</html>
