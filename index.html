@@ -336,6 +336,7 @@
     <button class="nav-btn" id="nav-live" onclick="goTo('live')">🔴 Live</button>
     <button class="nav-btn" id="nav-leaderboard" onclick="goTo('leaderboard')">🏆 Classifica</button>
     <button class="nav-btn" id="nav-adminquick" onclick="showQuickAdmin()" style="max-width:44px;">🔐</button>
+    <button class="nav-btn" onclick="toggleGuide()" style="max-width:44px;">❓</button>
   </div>
 </div>
 
@@ -350,6 +351,96 @@
 </div>
 
 <div id="toast" class="toast"></div>
+
+<!-- ═══════════ GUIDA PARTECIPANTI ═══════════ -->
+<div id="guideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:300;overflow-y:auto;padding:20px 16px 100px;">
+  <div style="max-width:600px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.8rem;">❓ Come si gioca</h2>
+      <button onclick="toggleGuide()" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;">✕ Chiudi</button>
+    </div>
+
+    <!-- ACCESSO -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">🔑 Come accedere</h3>
+      <p style="font-size:.9rem;margin-bottom:12px;color:var(--text2);">Hai due opzioni:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="font-weight:700;color:var(--blue);margin-bottom:6px;">🔵 Google</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.6;">Clicca "Accedi con Google", scegli il tuo account e poi Partecipa.</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="font-weight:700;color:var(--gold);margin-bottom:6px;">🔢 Nome + PIN</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.6;">Scrivi il tuo nome, scegli un PIN di 4 cifre e clicca Entra.</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(248,113,113,.08);border-radius:8px;border-left:3px solid var(--red);font-size:.8rem;color:var(--text2);">
+        ⚠️ Ricorda il tuo PIN! Lo userai ogni volta che rientri. Se hai già un account senza PIN, inserisci lo stesso nome e scegli un PIN nuovo.
+      </div>
+    </div>
+
+    <!-- SQUADRA -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">👥 Come scegliere la squadra</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">1</div>
+          <div style="font-size:.88rem;">Aspetta che l'admin apra il <strong>Draft</strong>. La pagina si aggiorna da sola ogni pochi secondi.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">2</div>
+          <div style="font-size:.88rem;">Sfoglia il roster e <strong>clicca sulle persone</strong> che vuoi in squadra (di solito 3).</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">3</div>
+          <div style="font-size:.88rem;">Scegli il tuo <strong>👑 Capitano</strong> tra le 3 persone selezionate — vale punti doppi!</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">4</div>
+          <div style="font-size:.88rem;">Clicca <strong>✨ Conferma Squadra</strong>. Non puoi cambiare dopo!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPITANO -->
+    <div class="card" style="margin-bottom:14px;border-color:var(--gold);">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">👑 Il Capitano</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Il capitano è la tua scommessa principale. Ogni evento che coinvolge il tuo capitano vale <strong style="color:var(--gold);">il doppio dei punti</strong>.</p>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(240,192,64,.1);border-radius:8px;font-size:.82rem;color:var(--text2);">
+        💡 <strong>Strategia:</strong> scegli come capitano la persona che secondo te farà più cose durante la giornata — chi fa domande, chi si emoziona, chi festeggia di più.
+      </div>
+    </div>
+
+    <!-- PUNTEGGI -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">⚡ Come si guadagnano i punti</h3>
+      <p style="font-size:.88rem;margin-bottom:12px;line-height:1.6;">Durante la cerimonia l'admin assegna eventi alle persone del roster. Se quella persona è nella tua squadra, <strong>guadagni i punti istantaneamente</strong>.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="padding:10px;background:rgba(74,222,128,.08);border-radius:8px;border:1px solid var(--green);">
+          <div style="color:var(--green);font-weight:700;font-size:.85rem;margin-bottom:4px;">⭐ BONUS (punti +)</div>
+          <div style="font-size:.78rem;color:var(--text2);line-height:1.5;">Risposta perfetta, applauso, lode, primo brindisi, piange di gioia…</div>
+        </div>
+        <div style="padding:10px;background:rgba(248,113,113,.08);border-radius:8px;border:1px solid var(--red);">
+          <div style="color:var(--red);font-weight:700;font-size:.85rem;margin-bottom:4px;">💥 MALUS (punti −)</div>
+          <div style="font-size:.78rem;color:var(--text2);line-height:1.5;">Telefono che squilla, risposta sbagliata, arriva in ritardo…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">🔴 Durante il gioco</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Vai sulla tab <strong>🔴 Live</strong> per vedere la classifica in tempo reale, i tuoi punti e gli ultimi eventi assegnati. La pagina si aggiorna automaticamente — non serve ricaricare!</p>
+    </div>
+
+    <!-- FINALE -->
+    <div class="card" style="border-color:var(--gold);">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">🏆 Classifica Finale</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Quando la cerimonia finisce l'admin chiude il gioco e su tutti i telefoni appare la <strong>classifica finale con podio</strong> e coriandoli 🎊. Chi ha il punteggio più alto vince!</p>
+    </div>
+
+  </div>
+</div>
 
 <script>
 /* ════════════════════════════════
@@ -596,6 +687,11 @@ function goTo(name) {
 /* ════════════════════════════════
    HOME
 ════════════════════════════════ */
+function toggleGuide() {
+  const el = document.getElementById('guideOverlay');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
 function toggleAdminLogin() {
   const el = document.getElementById('adminLoginCard');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
