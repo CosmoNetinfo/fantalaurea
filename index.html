@@ -132,7 +132,7 @@
       <p class="text-muted mt-1" style="margin-bottom:24px;font-size:.9rem;">Accedi con Google per partecipare</p>
 
       <button class="btn btn-full mt-2" id="googleSignInBtn" onclick="signInWithGoogle()" style="background:#fff;color:#333;border:1px solid #ddd;justify-content:center;gap:12px;font-size:1rem;padding:14px 24px;">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:22px;height:22px;">
+        <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Accedi con Google
       </button>
 
@@ -149,17 +149,9 @@
       </div>
 
       <div style="margin-top:16px;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);">
-        <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:12px;">Oppure accedi con PIN</p>
-        <div class="form-group" style="margin-bottom:10px;">
-          <input type="text" id="nicknameInput" placeholder="Il tuo nome" maxlength="24" style="width:100%;" onkeydown="if(event.key==='Enter')document.getElementById('pinInput').focus()">
+        <div id="pinLoginSection">
+          <!-- Populated by renderLoginForm() -->
         </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <input type="text" id="pinInput" placeholder="PIN 4 cifre" maxlength="4" inputmode="numeric" pattern="[0-9]*"
-            style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
-            onkeydown="if(event.key==='Enter')joinGameNick()"
-            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
-        </div>
-        <button class="btn btn-secondary btn-full btn-sm" onclick="joinGameNick()">🎯 Entra</button>
       </div>
 
       <hr class="divider">
@@ -351,6 +343,7 @@
 </div>
 
 <div id="toast" class="toast"></div>
+<button onclick="toggleGuide()" style="position:fixed;top:14px;right:14px;z-index:200;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Come si gioca">❓</button>
 
 <!-- ═══════════ GUIDA PARTECIPANTI ═══════════ -->
 <div id="guideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:300;overflow-y:auto;padding:20px 16px 100px;">
@@ -673,6 +666,7 @@ window.onload = function() {
    VIEW ROUTING
 ════════════════════════════════ */
 function goTo(name) {
+  if (name === 'home') setTimeout(renderLoginForm, 50);
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + name);
   if (el) el.classList.add('active');
@@ -687,6 +681,51 @@ function goTo(name) {
 /* ════════════════════════════════
    HOME
 ════════════════════════════════ */
+function renderLoginForm() {
+  const savedNick = localStorage.getItem('fl_nick');
+  const sec = document.getElementById('pinLoginSection');
+  if (!sec) return;
+  if (savedNick) {
+    // Returning user — show only PIN
+    sec.innerHTML = `
+      <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:4px;">Bentornato</p>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:12px;color:var(--text);">👤 ${savedNick}</div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="pinInput" placeholder="Il tuo PIN" maxlength="4" inputmode="numeric"
+          style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
+          onkeydown="if(event.key==='Enter')joinGameNick()"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"
+          autofocus>
+      </div>
+      <button class="btn btn-primary btn-full btn-sm" onclick="joinGameNick()">🎯 Entra</button>
+      <div style="text-align:center;margin-top:10px;">
+        <button onclick="clearSavedUser()" style="background:none;border:none;color:var(--text2);font-size:.78rem;cursor:pointer;text-decoration:underline;">Non sono io? Cambia utente</button>
+      </div>`;
+  } else {
+    // New user — show name + PIN
+    sec.innerHTML = `
+      <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:12px;">Accedi con PIN</p>
+      <div class="form-group" style="margin-bottom:10px;">
+        <input type="text" id="nicknameInput" placeholder="Il tuo nome" maxlength="24" style="width:100%;"
+          onkeydown="if(event.key==='Enter')document.getElementById('pinInput').focus()">
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="pinInput" placeholder="PIN 4 cifre" maxlength="4" inputmode="numeric"
+          style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
+          onkeydown="if(event.key==='Enter')joinGameNick()"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+      </div>
+      <button class="btn btn-secondary btn-full btn-sm" onclick="joinGameNick()">🎯 Registrati</button>`;
+  }
+}
+
+function clearSavedUser() {
+  localStorage.removeItem('fl_nick');
+  localStorage.removeItem('fl_pin');
+  currentNick = null;
+  renderLoginForm();
+}
+
 function toggleGuide() {
   const el = document.getElementById('guideOverlay');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -725,7 +764,9 @@ async function joinGame() {
 }
 
 async function joinGameNick() {
-  const nick = document.getElementById('nicknameInput').value.trim();
+  const savedNick = localStorage.getItem('fl_nick');
+  const nickEl = document.getElementById('nicknameInput');
+  const nick = savedNick || (nickEl ? nickEl.value.trim() : '');
   const pin  = document.getElementById('pinInput').value.trim();
   if (!nick || nick.length < 2) { toast('Inserisci il tuo nome!', 'error'); return; }
   if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { toast('Inserisci un PIN di 4 cifre!', 'error'); return; }
