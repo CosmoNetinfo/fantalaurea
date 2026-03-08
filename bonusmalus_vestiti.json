@@ -1,0 +1,22 @@
+[
+  {"name": "Indossa qualcosa con un colore Pantone riconoscibile", "points": 8, "emoji": "🎨"},
+  {"name": "Outfit completamente coordinato (total look)", "points": 7, "emoji": "👔"},
+  {"name": "Scarpe nuove visibilmente mai indossate prima", "points": 5, "emoji": "👟"},
+  {"name": "Porta un accessorio fatto da lui/lei (design custom)", "points": 10, "emoji": "✂️"},
+  {"name": "La cravatta o il foulard è perfettamente annodato", "points": 4, "emoji": "👔"},
+  {"name": "Capelli fatti dal parrucchiere apposta", "points": 5, "emoji": "💇"},
+  {"name": "La commissione fa un complimento sul look", "points": 9, "emoji": "😍"},
+  {"name": "Porta una borsa che sembra uscita da un catalogo", "points": 6, "emoji": "👜"},
+  {"name": "Unghie o dettagli curati nei minimi particolari", "points": 4, "emoji": "💅"},
+  {"name": "Il fidanzato/a ha il look coordinato con lui/lei", "points": 7, "emoji": "💑"},
+  {"name": "Etichetta del vestito visibile durante la discussione", "points": -7, "emoji": "🏷️"},
+  {"name": "Scarpa slacciata mentre cammina verso la commissione", "points": -6, "emoji": "👟"},
+  {"name": "Macchia sul vestito (caffè, rossetto, penna...)", "points": -8, "emoji": "🩸"},
+  {"name": "Camicia non stirata visibilmente", "points": -5, "emoji": "👕"},
+  {"name": "Collant smagliati", "points": -6, "emoji": "🦵"},
+  {"name": "Trucco che cola per il caldo o le lacrime", "points": -5, "emoji": "💄"},
+  {"name": "Capelli che si disfano durante la presentazione", "points": -4, "emoji": "💇"},
+  {"name": "Indossa ancora il cartellino del negozio", "points": -9, "emoji": "🏷️"},
+  {"name": "Orecchini o accessori che tintinnano durante la discussione", "points": -4, "emoji": "🔔"},
+  {"name": "Papà o mamma vestiti in modo imbarazzante", "points": -6, "emoji": "😬"}
+]
