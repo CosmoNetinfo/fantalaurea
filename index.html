@@ -127,14 +127,41 @@
 <!-- VIEW: HOME -->
 <div id="view-home" class="view">
   <div class="container">
-    <div class="card" style="max-width:440px;margin:0 auto;">
+    <div class="card" style="max-width:440px;margin:0 auto;text-align:center;">
       <h2 class="card-title">Entra nel gioco</h2>
-      <p class="text-muted mt-1" style="margin-bottom:20px;font-size:.9rem;">Scegli un nickname per partecipare</p>
-      <div class="form-group">
-        <label>Il tuo nickname</label>
-        <input type="text" id="nicknameInput" placeholder="es. ZioMario, ProfBianchi…" maxlength="20" onkeydown="if(event.key==='Enter')joinGame()">
+      <p class="text-muted mt-1" style="margin-bottom:24px;font-size:.9rem;">Accedi con Google per partecipare</p>
+
+      <button class="btn btn-full mt-2" id="googleSignInBtn" onclick="signInWithGoogle()" style="background:#fff;color:#333;border:1px solid #ddd;justify-content:center;gap:12px;font-size:1rem;padding:14px 24px;">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:22px;height:22px;">
+        Accedi con Google
+      </button>
+
+      <div id="userInfoBar" style="display:none;margin-top:16px;padding:12px 16px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);">
+        <div class="flex align-center gap-2">
+          <img id="userAvatar" src="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+          <div style="flex:1;text-align:left;">
+            <div id="userDisplayName" style="font-weight:600;font-size:.95rem;"></div>
+            <div id="userEmail" style="color:var(--text2);font-size:.75rem;"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="signOut()">Esci</button>
+        </div>
+        <button class="btn btn-primary btn-full mt-3" onclick="joinGame()">🎯 Partecipa</button>
       </div>
-      <button class="btn btn-primary btn-full mt-3" onclick="joinGame()">🎯 Partecipa</button>
+
+      <div style="margin-top:16px;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);">
+        <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:12px;">Oppure accedi con PIN</p>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" id="nicknameInput" placeholder="Il tuo nome" maxlength="24" style="width:100%;" onkeydown="if(event.key==='Enter')document.getElementById('pinInput').focus()">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <input type="text" id="pinInput" placeholder="PIN 4 cifre" maxlength="4" inputmode="numeric" pattern="[0-9]*"
+            style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
+            onkeydown="if(event.key==='Enter')joinGameNick()"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+        </div>
+        <button class="btn btn-secondary btn-full btn-sm" onclick="joinGameNick()">🎯 Entra</button>
+      </div>
+
       <hr class="divider">
       <div class="text-center">
         <button class="btn btn-secondary btn-sm" onclick="toggleAdminLogin()">🔐 Accesso Admin</button>
@@ -344,6 +371,7 @@ let players     = {};
 let events      = [];
 let selectedTeam = [];
 let currentView  = '';
+let auth         = null;
 
 /* ════════════════════════════════
    FIRESTORE REST HELPERS
@@ -491,8 +519,21 @@ async function startApp() {
     // Session restore
     const savedAdmin = localStorage.getItem('fl_admin');
     const savedNick  = localStorage.getItem('fl_nick');
+    const savedPin   = localStorage.getItem('fl_pin');
     if (savedAdmin === 'true') { isAdmin = true; goTo('admin'); }
-    else if (savedNick) { currentNick = savedNick; document.getElementById('playerNav').style.display = 'block'; goTo('live'); }
+    else if (savedNick) {
+      // Verify PIN still matches
+      const p = players[savedNick];
+      if (!p || !p.pin || p.pin === savedPin) {
+        currentNick = savedNick;
+        document.getElementById('playerNav').style.display = 'block';
+        goTo('live');
+      } else {
+        localStorage.removeItem('fl_nick');
+        localStorage.removeItem('fl_pin');
+        goTo('home');
+      }
+    }
     else { goTo('home'); }
     // Start polling loop
     setInterval(pollAll, 4000);
@@ -502,7 +543,40 @@ async function startApp() {
   }
 }
 
-window.onload = startApp;
+window.onload = function() {
+  // Load Firebase App SDK
+  const s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+  s1.onload = function() {
+    // Load Firestore (not needed for REST but needed for auth SDK compat)
+    const s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+    s2.onload = function() {
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        auth = firebase.auth();
+        // Listen for auth state changes
+        auth.onAuthStateChanged(function(user) {
+          if (user) {
+            document.getElementById('userAvatar').src = user.photoURL || '';
+            document.getElementById('userDisplayName').textContent = user.displayName || user.email;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userInfoBar').style.display = 'block';
+            document.getElementById('googleSignInBtn').style.display = 'none';
+          } else {
+            document.getElementById('userInfoBar').style.display = 'none';
+            document.getElementById('googleSignInBtn').style.display = 'flex';
+          }
+        });
+      } catch(e) { /* already initialized */ 
+        try { auth = firebase.auth(); } catch(e2) {}
+      }
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+  startApp();
+};
 
 /* ════════════════════════════════
    VIEW ROUTING
@@ -527,24 +601,80 @@ function toggleAdminLogin() {
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
+async function signInWithGoogle() {
+  if (!auth) { toast('Auth non disponibile, usa il nickname', 'error'); return; }
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    toast('Accesso effettuato! 🎉', 'success');
+  } catch(e) {
+    toast('Errore Google: ' + e.message, 'error');
+  }
+}
+
+async function signOut() {
+  if (auth) await auth.signOut();
+  localStorage.removeItem('fl_nick');
+  currentNick = null;
+  document.getElementById('playerNav').style.display = 'none';
+  goTo('home');
+}
+
 async function joinGame() {
+  // Called when user is signed in with Google
+  const user = auth ? auth.currentUser : null;
+  if (!user) { toast('Accedi con Google prima!', 'error'); return; }
+  const nick = user.displayName || user.email.split('@')[0];
+  await _doJoin(nick, user.photoURL);
+}
+
+async function joinGameNick() {
   const nick = document.getElementById('nicknameInput').value.trim();
-  if (!nick || nick.length < 2) { toast('Inserisci un nickname (min 2 caratteri)', 'error'); return; }
-  const btn = document.querySelector('#view-home .btn-primary');
-  btn.textContent = '⏳ Connessione…'; btn.disabled = true;
+  const pin  = document.getElementById('pinInput').value.trim();
+  if (!nick || nick.length < 2) { toast('Inserisci il tuo nome!', 'error'); return; }
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { toast('Inserisci un PIN di 4 cifre!', 'error'); return; }
+
+  // Check if player already exists
+  const existing = await fsGet('players', nick);
+  if (existing && existing.fields) {
+    const data = fromFirestore(existing.fields);
+    // Player exists — verify PIN
+    if (data.pin && data.pin !== pin) {
+      toast('PIN errato! Riprova.', 'error'); return;
+    }
+    // PIN ok or no pin set yet — update pin if missing
+    if (!data.pin) await fsUpdate('players', nick, { pin });
+  } else {
+    // New player — create with PIN
+    await fsSet('players', nick, { nickname:nick, pin, team:[], score:0, ts:Date.now() });
+  }
+  currentNick = nick;
+  localStorage.setItem('fl_nick', nick);
+  localStorage.setItem('fl_pin', pin);
+  document.getElementById('playerNav').style.display = 'block';
+  await pollAll();
+  goTo('draft');
+  toast('Bentornato ' + nick + '! 🎉', 'success');
+}
+
+async function _doJoin(nick, photoURL) {
+  const btn = document.querySelector('#view-home .btn-primary') || document.querySelector('#view-home button');
+  if (btn) { btn.textContent = '⏳ Connessione…'; btn.disabled = true; }
   try {
     currentNick = nick;
     localStorage.setItem('fl_nick', nick);
     const existing = await fsGet('players', nick);
+    const data = { nickname:nick, team:[], score:0, ts:Date.now() };
+    if (photoURL) data.photoURL = photoURL;
     if (!existing || existing.error) {
-      await fsSet('players', nick, { nickname:nick, team:[], score:0, ts:Date.now() });
+      await fsSet('players', nick, data);
     }
     document.getElementById('playerNav').style.display = 'block';
     await pollAll();
     goTo('draft');
   } catch(e) {
     toast('Errore connessione: ' + e.message, 'error');
-    btn.textContent = '🎯 Partecipa'; btn.disabled = false;
+    if (btn) { btn.textContent = '🎯 Partecipa'; btn.disabled = false; }
   }
 }
 
@@ -722,8 +852,12 @@ function lbItem(p, rank) {
     return m ? (isCap ? '👑 ' + m.name : m.name) : '?';
   }).join(', ');
   const isMe  = p.id === currentNick;
+  const avatar = p.photoURL
+    ? `<img src="${p.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+    : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#07091a;flex-shrink:0;">${(p.nickname||p.id).slice(0,2).toUpperCase()}</div>`;
   return `<div class="lb-item ${rank<=3?'top-'+rank:''} ${isMe?'is-me':''}">
     <div class="lb-rank">${rankEmoji(rank)}</div>
+    ${avatar}
     <div class="lb-info">
       <div class="lb-name">${p.nickname||p.id}${isMe?' <span class="chip" style="font-size:.7rem;padding:2px 7px;">Tu</span>':''}</div>
       <div class="lb-team">${names||'Nessuna squadra'}</div>
