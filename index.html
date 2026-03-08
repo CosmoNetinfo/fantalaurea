@@ -269,6 +269,8 @@
         <div class="flex gap-2 flex-wrap">
           <button class="btn btn-primary btn-sm" onclick="addBM()">➕ Aggiungi</button>
           <button class="btn btn-secondary btn-sm" onclick="loadDefaultBM()">📋 Carica preset</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importJsonInput').click()">📂 Importa JSON</button>
+          <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importBMFromJson(event)">
         </div>
       </div>
       <div class="card mt-3"><h2 class="card-title">Elenco Bonus/Malus</h2><div id="adminBMList" class="mt-2"></div></div>
@@ -801,6 +803,33 @@ const DEFAULTS = [
   {name:'Risposta sbagliata',points:-4,emoji:'❌'},{name:'Supera il tempo',points:-3,emoji:'⏰'},
   {name:'Arriva in ritardo',points:-7,emoji:'🚗'},{name:'Prof si addormenta',points:-6,emoji:'😴'},
 ];
+
+async function importBMFromJson(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  let items;
+  try {
+    items = JSON.parse(text);
+  } catch(e) {
+    toast('File JSON non valido!', 'error'); return;
+  }
+  if (!Array.isArray(items)) { toast('Il file deve contenere un array JSON', 'error'); return; }
+  let count = 0;
+  for (const bm of items) {
+    if (!bm.name || bm.points === undefined) continue;
+    const id = bm.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, {
+      name: bm.name,
+      points: parseInt(bm.points),
+      emoji: bm.emoji || (bm.points > 0 ? '⭐' : '💥')
+    });
+    count++;
+  }
+  toast(`✅ Importati ${count} eventi!`, 'success');
+  event.target.value = '';
+  await pollAll();
+}
 
 async function loadDefaultBM() {
   for (const bm of DEFAULTS) {
