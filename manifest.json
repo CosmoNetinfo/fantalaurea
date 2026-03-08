@@ -1,0 +1,27 @@
+{
+  "name": "FantaLaurea",
+  "short_name": "FantaLaurea",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07091a",
+  "theme_color": "#07091a",
+  "description": "Il gioco della laurea",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
