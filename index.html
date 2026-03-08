@@ -180,6 +180,7 @@
         <p class="section-label">Roster completo</p>
         <div id="draftRosterGrid" class="roster-grid"></div>
       </div>
+      <div id="captainSection" class="card mt-3" style="display:none;"></div>
       <button id="confirmTeamBtn" class="btn btn-primary btn-full mt-3" onclick="submitTeam()" disabled>
         ✨ Conferma Squadra
       </button>
@@ -592,7 +593,7 @@ function renderDraftView() {
   if (player && player.team && player.team.length > 0) {
     document.getElementById('draftDone').style.display = 'block';
     document.getElementById('draftDoneTeam').innerHTML =
-      player.team.map(id => { const m=roster[id]; return m?`<span class="chip">✓ ${m.name}</span>`:''; }).join('');
+      player.team.map(id => { const m=roster[id]; const isCap=player.captain===id; return m?`<span class="chip" style="${isCap?'border-color:var(--gold);background:rgba(240,192,64,.2);':''}">${isCap?'👑 ':'✓ '}${m.name}</span>`:''; }).join('');
     return;
   }
   if (status === 'setup' || status === 'finished' || status === 'live') {
@@ -627,10 +628,42 @@ function renderDraftView() {
   } else bar.style.display = 'none';
 
   const btn = document.getElementById('confirmTeamBtn');
-  btn.disabled = selectedTeam.length !== teamSize;
-  btn.textContent = selectedTeam.length === teamSize
-    ? '✨ Conferma Squadra'
-    : `Seleziona ancora ${teamSize - selectedTeam.length}`;
+  const teamComplete = selectedTeam.length === teamSize;
+  const captainChosen = selectedCaptain !== null;
+
+  // Show captain picker once team is complete
+  const capSection = document.getElementById('captainSection');
+  if (teamComplete) {
+    capSection.style.display = 'block';
+    capSection.innerHTML = `
+      <p class="section-label" style="margin-bottom:10px;">👑 Scegli il Capitano <span style="color:var(--text2);font-size:.75rem;">(punti doppi!)</span></p>
+      <div class="flex gap-2 flex-wrap">
+        ${selectedTeam.map(id => {
+          const m = roster[id];
+          const isCap = selectedCaptain === id;
+          return m ? `<div onclick="setCaptain('${id}')" style="cursor:pointer;padding:10px 16px;border-radius:10px;border:2px solid ${isCap?'var(--gold)':'var(--border)'};background:${isCap?'rgba(240,192,64,.15)':'var(--bg2)'};transition:all .2s;text-align:center;">
+            <div style="font-size:1.4rem;">${isCap?'👑':'👤'}</div>
+            <div style="font-weight:600;font-size:.88rem;margin-top:4px;">${m.name}</div>
+            ${isCap?'<div style="font-size:.7rem;color:var(--gold);margin-top:2px;">CAPITANO</div>':''}
+          </div>` : '';
+        }).join('')}
+      </div>`;
+  } else {
+    capSection.style.display = 'none';
+    selectedCaptain = null;
+  }
+
+  btn.disabled = !teamComplete || !captainChosen;
+  btn.textContent = !teamComplete
+    ? `Seleziona ancora ${teamSize - selectedTeam.length}`
+    : !captainChosen
+    ? '👑 Scegli il capitano'
+    : '✨ Conferma Squadra';
+}
+
+function setCaptain(id) {
+  selectedCaptain = id;
+  renderDraftView();
 }
 
 function toggleMember(id) {
@@ -647,7 +680,8 @@ async function submitTeam() {
   if (!currentNick) return;
   const teamSize = Number(gameConfig.teamSize) || 3;
   if (selectedTeam.length !== teamSize) { toast(`Seleziona esattamente ${teamSize} persone`,'error'); return; }
-  await fsUpdate('players', currentNick, { team: selectedTeam });
+  if (!selectedCaptain) { toast('Scegli il capitano!','error'); return; }
+  await fsUpdate('players', currentNick, { team: selectedTeam, captain: selectedCaptain });
   toast('Squadra confermata! 🎉','success');
   await pollAll();
   renderDraftView();
@@ -668,7 +702,8 @@ function updateLiveView() {
   if (player.team && player.team.length > 0) {
     teamEl.innerHTML = player.team.map(id => {
       const m = roster[id];
-      return m ? `<span class="chip">${m.name} <strong>${m.totalPoints||0}pt</strong></span>` : '';
+      const isCap = player.captain === id;
+      return m ? `<span class="chip" style="${isCap?'border-color:var(--gold);background:rgba(240,192,64,.2);':''}">${isCap?'👑 ':''}<strong>${m.name}</strong> ${m.totalPoints||0}pt</span>` : '';
     }).join('');
   } else teamEl.innerHTML = '<span class="text-muted" style="font-size:.85rem;">Nessuna squadra</span>';
 }
@@ -681,7 +716,11 @@ function renderLeaderboards() {
 }
 
 function lbItem(p, rank) {
-  const names = (p.team||[]).map(id=>roster[id]?.name||'?').join(', ');
+  const names = (p.team||[]).map(id=>{
+    const m = roster[id];
+    const isCap = p.captain === id;
+    return m ? (isCap ? '👑 ' + m.name : m.name) : '?';
+  }).join(', ');
   const isMe  = p.id === currentNick;
   return `<div class="lb-item ${rank<=3?'top-'+rank:''} ${isMe?'is-me':''}">
     <div class="lb-rank">${rankEmoji(rank)}</div>
@@ -920,12 +959,15 @@ async function assignEvent(bmId) {
   const newTotal = Number(person.totalPoints||0) + pts;
   await fsUpdate('roster', rosterId, { totalPoints: newTotal });
 
-  // Update players who have this person
+  // Update players who have this person (double if captain)
   for (const p of Object.values(players)) {
     const team = p.team || [];
     if (team.includes(rosterId)) {
-      const newScore = Number(p.score||0) + pts;
+      const isCaptain = p.captain === rosterId;
+      const earnedPts = isCaptain ? pts * 2 : pts;
+      const newScore = Number(p.score||0) + earnedPts;
       await fsUpdate('players', p.id, { score: newScore });
+      if (isCaptain) toast(`👑 Capitano! ${bm.emoji} ${bm.name} → ${person.name} (${earnedPts>0?'+':''}${earnedPts}pt x2!)`,'success');
     }
   }
 
