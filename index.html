@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎓 FantaLaurea</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- PWA & Mobile Home Screen -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#07091a">
-  <link rel="apple-touch-icon" href="logo.png">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="FantaLaurea">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" type="image/png" href="logo.png">
   <style>
     :root {
       --bg:#07091a;--bg2:#0f1328;--card:#131830;--border:#252c55;
@@ -211,6 +202,1380 @@
     </div>
     <div id="draftOpen" style="display:none;">
       <div id="selectedBar" class="card" style="display:none;padding:16px 24px;">
+        <p class="section-label">La tua squadra</p>
+        <div id="selectedBarList" class="flex gap-2 flex-wrap"></div>
+      </div>
+      <div class="card">
+        <p class="section-label">Roster completo</p>
+        <div id="draftRosterGrid" class="roster-grid"></div>
+      </div>
+      <div id="captainSection" class="card mt-3" style="display:none;"></div>
+      <button id="confirmTeamBtn" class="btn btn-primary btn-full mt-3" onclick="submitTeam()" disabled>
+        ✨ Conferma Squadra
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: LIVE -->
+<div id="view-live" class="view">
+  <div class="container">
+    <div class="flex align-center gap-2" style="margin-bottom:20px;flex-wrap:wrap;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);">Classifica Live</h2>
+      <span class="badge badge-live"><span class="pulse">●</span> LIVE</span>
+    </div>
+    <div class="card" style="border-color:var(--gold);">
+      <div class="flex align-center justify-between">
+        <div><p class="section-label">La tua posizione</p><p id="myRank" style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;">—</p></div>
+        <div style="text-align:right;"><p class="section-label">I tuoi punti</p><p id="myScore" style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold);line-height:1;">0</p></div>
+      </div>
+      <hr class="divider">
+      <p class="section-label">La tua squadra</p>
+      <div id="myTeamLive" class="flex gap-2 flex-wrap"></div>
+    </div>
+    <div class="card mt-3"><p class="section-label">Classifica</p><div id="liveLeaderboard" class="lb-list"></div></div>
+    <div class="card mt-3"><p class="section-label">Ultimi eventi</p><div id="eventLog" class="event-log"><div class="empty-state">Nessun evento ancora…</div></div></div>
+  </div>
+</div>
+
+<!-- VIEW: LEADERBOARD -->
+<div id="view-leaderboard" class="view">
+  <div class="container text-center">
+    <h2 style="font-family:'Playfair Display',serif;font-size:2.6rem;color:var(--gold);">🏆 Classifica Finale</h2>
+    <p class="text-muted mt-2">La FantaLaurea è terminata!</p>
+    <div id="podiumArea" class="mt-4"></div>
+    <div class="card mt-4" style="text-align:left;"><p class="section-label">Classifica completa</p><div id="finalLeaderboard" class="lb-list"></div></div>
+  </div>
+</div>
+
+<!-- VIEW: ADMIN -->
+<div id="view-admin" class="view">
+  <div class="container">
+    <div class="flex align-center justify-between" style="margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);">🔐 Pannello Admin</h2>
+        <div id="adminStatusBadge" class="mt-1"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="adminLogout()">Esci</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="showAdminTab('setup',this)">⚙️ Setup</button>
+      <button class="tab" onclick="showAdminTab('roster',this)">👥 Roster</button>
+      <button class="tab" onclick="showAdminTab('bm',this)">⚡ Bonus/Malus</button>
+      <button class="tab" onclick="showAdminTab('game',this)">🎮 Gioco</button>
+      <button class="tab" onclick="showAdminTab('players',this)">📊 Giocatori</button>
+      <button class="tab" onclick="showAdminTab('laureando',this)">📋 Laureando</button>
+    </div>
+
+    <div id="adminTab-setup" class="admin-tab">
+      <div class="card">
+        <h2 class="card-title">Configurazione partita</h2>
+        <div class="form-group mt-2"><label>Nome della partita</label><input type="text" id="cfgGameName" placeholder="es. Fantalaurea di Marco – 15 Luglio"></div>
+        <div class="form-group"><label>Persone per squadra</label><input type="number" id="cfgTeamSize" value="3" min="1" max="10"></div>
+        <div class="form-group"><label>Password Admin</label><input type="password" id="cfgAdminPwd" placeholder="Nuova password…"></div>
+        <button class="btn btn-primary mt-2" onclick="saveConfig()">💾 Salva</button>
+      </div>
+    </div>
+
+    <div id="adminTab-roster" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Aggiungi persona al roster</h2>
+        <div class="form-row mt-2">
+          <div class="form-group"><label>Nome</label><input type="text" id="rosterName" placeholder="Prof. Rossi"></div>
+          <div class="form-group"><label>Ruolo</label><input type="text" id="rosterRole" placeholder="es. Relatore, Papà…"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addRosterMember()">➕ Aggiungi</button>
+      </div>
+      <div class="card mt-3"><h2 class="card-title">Roster attuale</h2><div id="adminRosterList" class="mt-2"></div></div>
+    </div>
+
+    <div id="adminTab-bm" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Aggiungi Bonus/Malus</h2>
+        <div class="form-row mt-2">
+          <div class="form-group"><label>Nome evento</label><input type="text" id="bmName" placeholder="es. Risposta perfetta"></div>
+          <div class="form-group"><label>Punti (negativo = malus)</label><input type="number" id="bmPts" placeholder="5 oppure -3"></div>
+        </div>
+        <div class="form-group"><label>Emoji</label><input type="text" id="bmEmoji" placeholder="⭐" maxlength="2" style="max-width:100px;"></div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm" onclick="addBM()">➕ Aggiungi</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadDefaultBM()">📋 Carica preset</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importJsonInput').click()">📂 Importa JSON</button>
+          <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importBMFromJson(event)">
+        </div>
+      </div>
+      <div class="card mt-3"><h2 class="card-title">Elenco Bonus/Malus</h2><div id="adminBMList" class="mt-2"></div></div>
+    </div>
+
+    <div id="adminTab-game" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h2 class="card-title">Controllo partita</h2>
+        <div class="flex gap-2 flex-wrap mt-2">
+          <button class="btn btn-secondary btn-sm" onclick="setStatus('setup')">⚙️ Setup</button>
+          <button class="btn btn-success btn-sm" onclick="setStatus('draft')">📝 Apri Draft</button>
+          <button class="btn btn-primary btn-sm" onclick="setStatus('live')">🚀 Inizia Gioco</button>
+          <button class="btn btn-secondary btn-sm" onclick="setStatus('finished')">🏁 Termina</button>
+        </div>
+      </div>
+      <div class="card mt-3">
+        <h2 class="card-title">⚡ Assegna evento</h2>
+        <div class="form-group"><label>Persona</label><select id="eventPersonSelect"><option value="">— Seleziona —</option></select></div>
+        <p class="section-label mt-3">Bonus</p><div id="bmBonusGrid" class="bm-grid"></div>
+        <p class="section-label mt-3">Malus</p><div id="bmMalusGrid" class="bm-grid"></div>
+        <div id="recentEventsAdmin" class="mt-4"></div>
+      </div>
+    </div>
+
+    <div id="adminTab-players" class="admin-tab" style="display:none;">
+      <div class="card"><h2 class="card-title">Giocatori (<span id="playerCount">0</span>)</h2><div id="adminPlayersList" class="mt-2"></div></div>
+    </div>
+
+    <div id="adminTab-laureando" class="admin-tab" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <h2 class="card-title" style="margin:0;">📋 Profilo Laureando</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="lfAdminDownload('roster')">📥 Roster JSON</button>
+            <button class="btn btn-secondary btn-sm" onclick="lfAdminDownload('bm')">📥 Bonus/Malus JSON</button>
+            <button class="btn btn-primary btn-sm" onclick="lfAdminImport()">⬆️ Importa nell'app</button>
+          </div>
+        </div>
+        <div id="lf-admin-content">
+          <p style="color:var(--text2);font-size:.88rem;text-align:center;padding:20px 0;">Nessun dato ancora. Il laureando deve compilare il form e salvare.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="playerNav">
+  <div class="nav-inner">
+    <button class="nav-btn" id="nav-draft" onclick="goTo('draft')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>Draft</span>
+    </button>
+    <button class="nav-btn" id="nav-live" onclick="goTo('live')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M8.56 2.9a9 9 0 0 0 0 18.2"/><path d="M15.44 2.9a9 9 0 0 1 0 18.2"/></svg><span>Live</span>
+    </button>
+    <button class="nav-btn" id="nav-leaderboard" onclick="goTo('leaderboard')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Classifica</span>
+    </button>
+    <button class="nav-btn-icon" id="nav-adminquick" onclick="showQuickAdmin()" title="Admin"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+    <button class="nav-btn-icon" onclick="toggleGuide()" title="Guida"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg></button>
+  </div>
+</div>
+
+<!-- Quick admin login popup -->
+<div id="quickAdminPopup" style="display:none;position:fixed;bottom:70px;right:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;z-index:200;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+  <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em;">Password Admin</p>
+  <input type="password" id="quickAdminPwd" placeholder="Password…" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;margin-bottom:8px;" onkeydown="if(event.key==='Enter')quickLoginAdmin()">
+  <div style="display:flex;gap:6px;">
+    <button class="btn btn-primary btn-sm" style="flex:1;" onclick="quickLoginAdmin()">Accedi</button>
+    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('quickAdminPopup').style.display='none'">✕</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<button onclick="toggleGuide()" style="position:fixed;top:14px;right:14px;z-index:200;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text2);border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;" title="Come si gioca" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.1)';this.style.color='var(--text2)'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg></button>
+
+<!-- ═══════════ LAUREANDO FORM ═══════════ -->
+<div id="view-laureando-form" class="view">
+  <div class="container" style="max-width:680px;">
+    <div style="text-align:center;padding:32px 0 24px;">
+      <div style="font-size:3rem;margin-bottom:10px;">🎓</div>
+      <h1 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:2rem;margin-bottom:8px;">Compila il tuo profilo</h1>
+      <p style="color:var(--text2);font-size:.9rem;line-height:1.6;">Inserisci le persone che saranno alla tua cerimonia e gli eventi divertenti che potrebbero succedere.<br>L'organizzatore li importerà nell'app!</p>
+    </div>
+
+    <!-- Info base -->
+    <div class="card" style="margin-bottom:16px;">
+      <p class="section-label" style="margin-bottom:16px;">👤 Informazioni base</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group" style="margin:0;">
+          <label>Il tuo nome</label>
+          <input type="text" id="lf-name" placeholder="es. Marco Rossi">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Data laurea</label>
+          <input type="date" id="lf-date">
+        </div>
+      </div>
+    </div>
+
+    <!-- Roster -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <p class="section-label">👥 Persone presenti <span id="lf-roster-count" style="background:rgba(240,192,64,.15);color:var(--gold);border-radius:20px;padding:1px 9px;font-size:.72rem;font-weight:700;margin-left:6px;">0</span></p>
+      </div>
+      <p style="color:var(--text2);font-size:.83rem;margin-bottom:14px;line-height:1.5;">Professori, familiari, amici — tutte le persone che i giocatori potranno scegliere in squadra.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 32px;gap:8px;margin-bottom:6px;">
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Nome</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Ruolo</span>
+        <span></span>
+      </div>
+      <div id="lf-roster-rows"></div>
+      <button class="btn btn-secondary btn-sm mt-2" style="width:100%;border-style:dashed;" onclick="lfAddRoster()">＋ Aggiungi persona</button>
+    </div>
+
+    <!-- Bonus/Malus -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <p class="section-label">⚡ Bonus & Malus personalizzati <span id="lf-bm-count" style="background:rgba(240,192,64,.15);color:var(--gold);border-radius:20px;padding:1px 9px;font-size:.72rem;font-weight:700;margin-left:6px;">0</span></p>
+      </div>
+      <p style="color:var(--text2);font-size:.83rem;margin-bottom:14px;line-height:1.5;">Cose divertenti specifiche per la tua laurea. Punti positivi = bonus, negativi = malus.</p>
+      <div style="display:grid;grid-template-columns:1fr 70px 54px 32px;gap:8px;margin-bottom:6px;">
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Evento</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:center;">Punti</span>
+        <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:center;">Emoji</span>
+        <span></span>
+      </div>
+      <div id="lf-bm-rows"></div>
+      <button class="btn btn-secondary btn-sm mt-2" style="width:100%;border-style:dashed;" onclick="lfAddBM()">＋ Aggiungi evento</button>
+    </div>
+
+    <!-- Save button -->
+    <button class="btn btn-primary btn-full" onclick="lfSave()" style="margin-bottom:12px;">💾 Salva e invia all'organizzatore</button>
+    <button class="btn btn-secondary btn-full" onclick="goTo('home')" style="margin-bottom:40px;">← Torna indietro</button>
+  </div>
+</div>
+
+<!-- ═══════════ GUIDA PARTECIPANTI ═══════════ -->
+<div id="guideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:300;overflow-y:auto;padding:20px 16px 100px;">
+  <div style="max-width:600px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.8rem;">❓ Come si gioca</h2>
+      <button onclick="toggleGuide()" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;">✕ Chiudi</button>
+    </div>
+
+    <!-- ACCESSO -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">🔑 Come accedere</h3>
+      <p style="font-size:.9rem;margin-bottom:12px;color:var(--text2);">Hai due opzioni:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="font-weight:700;color:var(--blue);margin-bottom:6px;">🔵 Google</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.6;">Clicca "Accedi con Google", scegli il tuo account e poi Partecipa.</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="font-weight:700;color:var(--gold);margin-bottom:6px;">🔢 Nome + PIN</div>
+          <div style="font-size:.82rem;color:var(--text2);line-height:1.6;">Scrivi il tuo nome, scegli un PIN di 4 cifre e clicca Entra.</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(248,113,113,.08);border-radius:8px;border-left:3px solid var(--red);font-size:.8rem;color:var(--text2);">
+        ⚠️ Ricorda il tuo PIN! Lo userai ogni volta che rientri. Se hai già un account senza PIN, inserisci lo stesso nome e scegli un PIN nuovo.
+      </div>
+    </div>
+
+    <!-- SQUADRA -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">👥 Come scegliere la squadra</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">1</div>
+          <div style="font-size:.88rem;">Aspetta che l'admin apra il <strong>Draft</strong>. La pagina si aggiorna da sola ogni pochi secondi.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">2</div>
+          <div style="font-size:.88rem;">Sfoglia il roster e <strong>clicca sulle persone</strong> che vuoi in squadra (di solito 3).</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">3</div>
+          <div style="font-size:.88rem;">Scegli il tuo <strong>👑 Capitano</strong> tra le 3 persone selezionate — vale punti doppi!</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--bg2);border-radius:9px;">
+          <div style="width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07091a;font-size:.85rem;flex-shrink:0;">4</div>
+          <div style="font-size:.88rem;">Clicca <strong>✨ Conferma Squadra</strong>. Non puoi cambiare dopo!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPITANO -->
+    <div class="card" style="margin-bottom:14px;border-color:var(--gold);">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">👑 Il Capitano</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Il capitano è la tua scommessa principale. Ogni evento che coinvolge il tuo capitano vale <strong style="color:var(--gold);">il doppio dei punti</strong>.</p>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(240,192,64,.1);border-radius:8px;font-size:.82rem;color:var(--text2);">
+        💡 <strong>Strategia:</strong> scegli come capitano la persona che secondo te farà più cose durante la giornata — chi fa domande, chi si emoziona, chi festeggia di più.
+      </div>
+    </div>
+
+    <!-- PUNTEGGI -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:14px;">⚡ Come si guadagnano i punti</h3>
+      <p style="font-size:.88rem;margin-bottom:12px;line-height:1.6;">Durante la cerimonia l'admin assegna eventi alle persone del roster. Se quella persona è nella tua squadra, <strong>guadagni i punti istantaneamente</strong>.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="padding:10px;background:rgba(74,222,128,.08);border-radius:8px;border:1px solid var(--green);">
+          <div style="color:var(--green);font-weight:700;font-size:.85rem;margin-bottom:4px;">⭐ BONUS (punti +)</div>
+          <div style="font-size:.78rem;color:var(--text2);line-height:1.5;">Risposta perfetta, applauso, lode, primo brindisi, piange di gioia…</div>
+        </div>
+        <div style="padding:10px;background:rgba(248,113,113,.08);border-radius:8px;border:1px solid var(--red);">
+          <div style="color:var(--red);font-weight:700;font-size:.85rem;margin-bottom:4px;">💥 MALUS (punti −)</div>
+          <div style="font-size:.78rem;color:var(--text2);line-height:1.5;">Telefono che squilla, risposta sbagliata, arriva in ritardo…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE -->
+    <div class="card" style="margin-bottom:14px;">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">🔴 Durante il gioco</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Vai sulla tab <strong>🔴 Live</strong> per vedere la classifica in tempo reale, i tuoi punti e gli ultimi eventi assegnati. La pagina si aggiorna automaticamente — non serve ricaricare!</p>
+    </div>
+
+    <!-- FINALE -->
+    <div class="card" style="border-color:var(--gold);">
+      <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:10px;">🏆 Classifica Finale</h3>
+      <p style="font-size:.88rem;line-height:1.7;">Quando la cerimonia finisce l'admin chiude il gioco e su tutti i telefoni appare la <strong>classifica finale con podio</strong> e coriandoli 🎊. Chi ha il punteggio più alto vince!</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════
+   CONFIG FIREBASE
+════════════════════════════════ */
+const PROJECT_ID  = "fantalaurea-a38df";
+const API_KEY     = "AIzaSyCeBj5l1G-RDkFn22ogMqn8g6YydRsIg4E";
+const BASE_URL    = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+const FIREBASE_CONFIG = {
+  apiKey: API_KEY,
+  authDomain: "fantalaurea-a38df.firebaseapp.com",
+  projectId: PROJECT_ID,
+  storageBucket: "fantalaurea-a38df.firebasestorage.app",
+  messagingSenderId: "12667991752",
+  appId: "1:12667991752:web:f8f69ea167a32b842b97fd"
+};
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+let currentNick = null;
+let isAdmin     = false;
+let gameConfig  = { name:'FantaLaurea', teamSize:3, adminPassword:'admin123', status:'setup' };
+let roster      = {};
+let bonusMalus  = {};
+let players     = {};
+let events      = [];
+let selectedTeam = [];
+let currentView  = '';
+let auth         = null;
+
+/* ════════════════════════════════
+   FIRESTORE REST HELPERS
+════════════════════════════════ */
+async function fsGet(collection, docId) {
+  const r = await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`);
+  if (r.status === 429) { console.warn('Rate limit:', collection); return null; }
+  if (!r.ok) return null;
+  return await r.json();
+}
+
+async function fsList(collection) {
+  const r = await fetch(`${BASE_URL}/${collection}?key=${API_KEY}&pageSize=200`);
+  if (r.status === 429) { console.warn('Rate limit:', collection); return []; }
+  if (!r.ok) return [];
+  const data = await r.json();
+  return data.documents || [];
+}
+
+async function fsSet(collection, docId, fields) {
+  const body = { fields: toFirestore(fields) };
+  const r = await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`, {
+    method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+async function fsAdd(collection, fields) {
+  const body = { fields: toFirestore(fields) };
+  const r = await fetch(`${BASE_URL}/${collection}?key=${API_KEY}&documentId=${Date.now()}_${Math.random().toString(36).slice(2,7)}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+async function fsDelete(collection, docId) {
+  await fetch(`${BASE_URL}/${collection}/${encodeURIComponent(docId)}?key=${API_KEY}`, { method:'DELETE' });
+}
+
+async function fsUpdate(collection, docId, fields) {
+  const existing = await fsGet(collection, docId);
+  let merged = {};
+  if (existing && existing.fields) merged = fromFirestore(existing.fields);
+  Object.assign(merged, fields);
+  return fsSet(collection, docId, merged);
+}
+
+// Convert JS object to Firestore format
+function toFirestore(obj) {
+  const out = {};
+  for (const [k,v] of Object.entries(obj)) {
+    if (v === null || v === undefined) { out[k] = {nullValue:null}; }
+    else if (typeof v === 'boolean') { out[k] = {booleanValue:v}; }
+    else if (typeof v === 'number')  { out[k] = {integerValue:String(v)}; }
+    else if (typeof v === 'string')  { out[k] = {stringValue:v}; }
+    else if (Array.isArray(v))       { out[k] = {arrayValue:{values:v.map(x=>({stringValue:String(x)}))}}; }
+    else { out[k] = {stringValue:JSON.stringify(v)}; }
+  }
+  return out;
+}
+
+// Convert Firestore fields to JS object
+function fromFirestore(fields) {
+  if (!fields) return {};
+  const out = {};
+  for (const [k,v] of Object.entries(fields)) {
+    if (v.stringValue  !== undefined) out[k] = v.stringValue;
+    else if (v.integerValue !== undefined) out[k] = parseInt(v.integerValue);
+    else if (v.doubleValue  !== undefined) out[k] = parseFloat(v.doubleValue);
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.nullValue    !== undefined) out[k] = null;
+    else if (v.arrayValue) {
+      out[k] = (v.arrayValue.values || []).map(x =>
+        x.stringValue ?? x.integerValue ?? x.booleanValue ?? null
+      );
+    }
+    else out[k] = null;
+  }
+  return out;
+}
+
+function docId(doc) {
+  return doc.name.split('/').pop();
+}
+
+/* ════════════════════════════════
+   POLLING (ogni 4 secondi)
+════════════════════════════════ */
+async function pollAll() {
+  try {
+    // Config
+    const cfgDoc = await fsGet('game', 'config');
+    if (cfgDoc && cfgDoc.fields) {
+      gameConfig = fromFirestore(cfgDoc.fields);
+      document.getElementById('gameNameDisplay').textContent = gameConfig.name || 'Il gioco della laurea';
+      document.getElementById('teamSizeLabel').textContent = gameConfig.teamSize || 3;
+      if (document.getElementById('cfgGameName')) document.getElementById('cfgGameName').value = gameConfig.name || '';
+      if (document.getElementById('cfgTeamSize')) document.getElementById('cfgTeamSize').value = gameConfig.teamSize || 3;
+      updateAdminStatusBadge();
+    }
+
+    // Roster
+    const rosterDocs = await fsList('roster');
+    roster = {};
+    rosterDocs.forEach(d => { roster[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+
+    // BonusMalus
+    const bmDocs = await fsList('bonusMalus');
+    bonusMalus = {};
+    bmDocs.forEach(d => { bonusMalus[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+
+    // Players
+    const playerDocs = await fsList('players');
+    players = {};
+    playerDocs.forEach(d => { players[docId(d)] = {id:docId(d), ...fromFirestore(d.fields)}; });
+    document.getElementById('playerCount').textContent = Object.keys(players).length;
+
+    // Events (last 20)
+    const evDocs = await fsList('events');
+    events = evDocs.map(d => ({id:docId(d), ...fromFirestore(d.fields)}))
+      .sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0,20);
+
+    // Re-render current view
+    renderCurrentView();
+  } catch(e) { /* silently ignore poll errors */ }
+}
+
+function renderCurrentView() {
+  if (currentView === 'draft')       renderDraftView();
+  if (currentView === 'live')        { renderLeaderboards(); updateLiveView(); }
+  if (currentView === 'leaderboard') renderFinalLeaderboard();
+  if (currentView === 'admin') {
+    renderAdminRoster(); renderAdminBM();
+    renderAdminPlayers(); populatePersonSelect();
+    renderBMButtons(); renderRecentEventsAdmin();
+  }
+}
+
+/* ════════════════════════════════
+   STARTUP
+════════════════════════════════ */
+async function startApp() {
+  document.getElementById('loadingMsg').textContent = 'Caricamento dati…';
+  try {
+    await pollAll();
+    document.getElementById('loadingOverlay').style.display = 'none';
+    // Session restore
+    const savedAdmin = localStorage.getItem('fl_admin');
+    const savedNick  = localStorage.getItem('fl_nick');
+    const savedPin   = localStorage.getItem('fl_pin');
+    if (savedAdmin === 'true') { isAdmin = true; goTo('admin'); }
+    else if (savedNick) {
+      // Verify PIN still matches
+      const p = players[savedNick];
+      if (!p || !p.pin || p.pin === savedPin) {
+        currentNick = savedNick;
+        document.getElementById('playerNav').style.display = 'block';
+        goTo('live');
+      } else {
+        localStorage.removeItem('fl_nick');
+        localStorage.removeItem('fl_pin');
+        goTo('home');
+      }
+    }
+    else { goTo('home'); }
+    // Start polling loop
+    const pollInterval = setInterval(() => {
+    if (!document.hidden) pollAll();
+  }, 15000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) pollAll();
+  });
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = '❌ Errore connessione. Ricarica la pagina.';
+    console.error(e);
+  }
+}
+
+window.onload = function() {
+  // Load Firebase App SDK
+  const s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+  s1.onload = function() {
+    // Load Firestore (not needed for REST but needed for auth SDK compat)
+    const s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+    s2.onload = function() {
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        auth = firebase.auth();
+        // Listen for auth state changes
+        auth.onAuthStateChanged(function(user) {
+          if (user) {
+            document.getElementById('userAvatar').src = user.photoURL || '';
+            document.getElementById('userDisplayName').textContent = user.displayName || user.email;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userInfoBar').style.display = 'block';
+            document.getElementById('googleSignInBtn').style.display = 'none';
+          } else {
+            document.getElementById('userInfoBar').style.display = 'none';
+            document.getElementById('googleSignInBtn').style.display = 'flex';
+          }
+        });
+      } catch(e) { /* already initialized */ 
+        try { auth = firebase.auth(); } catch(e2) {}
+      }
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+  startApp();
+};
+
+/* ════════════════════════════════
+   VIEW ROUTING
+════════════════════════════════ */
+function goTo(name) {
+  if (name === 'home') setTimeout(renderLoginForm, 50);
+  if (name === 'laureando-form') setTimeout(lfInitForm, 50);
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  currentView = name;
+  document.querySelectorAll('.nav-btn,.nav-btn-icon').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + name) || document.getElementById('nav-' + name + 'quick');
+  if (nb) nb.classList.add('active');
+  window.scrollTo(0,0);
+  renderCurrentView();
+}
+
+/* ════════════════════════════════
+   HOME
+════════════════════════════════ */
+/* ════════════════════════════════
+   LAUREANDO FORM
+════════════════════════════════ */
+let lfRosterId = 0, lfBmId = 0;
+
+function lfInitForm() {
+  const rr = document.getElementById('lf-roster-rows');
+  const br = document.getElementById('lf-bm-rows');
+  if (rr && rr.children.length === 0) {
+    for (let i=0;i<6;i++) lfAddRoster();
+    for (let i=0;i<3;i++) lfAddBM();
+  }
+  // Only pre-fill if form is empty
+  if (rr && rr.children.length === 0) return;
+}
+
+function lfAddRoster(name='', role='') {
+  const id = lfRosterId++;
+  const div = document.createElement('div');
+  div.id = 'lfr-' + id;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 32px;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `
+    <input type="text" placeholder="es. Prof. Bianchi" value="${name}" oninput="lfUpdateCounts()">
+    <input type="text" placeholder="es. Relatore" value="${role}" oninput="lfUpdateCounts()">
+    <button onclick="document.getElementById('lfr-${id}').remove();lfUpdateCounts()" style="width:32px;height:32px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;color:var(--red);cursor:pointer;font-size:.85rem;">✕</button>`;
+  document.getElementById('lf-roster-rows').appendChild(div);
+  lfUpdateCounts();
+}
+
+function lfAddBM(name='', points='', emoji='') {
+  const id = lfBmId++;
+  const div = document.createElement('div');
+  div.id = 'lfb-' + id;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 70px 54px 32px;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `
+    <input type="text" placeholder="es. Cita la nonna nel discorso" value="${name}" oninput="lfUpdateCounts()">
+    <input type="number" placeholder="+5" value="${points}" min="-20" max="20" style="text-align:center;" oninput="lfUpdateCounts()">
+    <input type="text" placeholder="😂" value="${emoji}" maxlength="2" style="text-align:center;font-size:1.1rem;">
+    <button onclick="document.getElementById('lfb-${id}').remove();lfUpdateCounts()" style="width:32px;height:32px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;color:var(--red);cursor:pointer;font-size:.85rem;">✕</button>`;
+  document.getElementById('lf-bm-rows').appendChild(div);
+  lfUpdateCounts();
+}
+
+function lfUpdateCounts() {
+  const rc = document.querySelectorAll('#lf-roster-rows input[placeholder="es. Prof. Bianchi"]').length;
+  const bc = document.querySelectorAll('#lf-bm-rows input[placeholder="es. Cita la nonna nel discorso"]').length;
+  const rEl = document.getElementById('lf-roster-count');
+  const bEl = document.getElementById('lf-bm-count');
+  if (rEl) rEl.textContent = rc;
+  if (bEl) bEl.textContent = bc;
+}
+
+function lfCollectRoster() {
+  const rows = document.querySelectorAll('#lf-roster-rows > div');
+  const result = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    const role = inputs[1].value.trim();
+    if (name) result.push({ name, role: role || 'Ospite', totalPoints: 0 });
+  });
+  return result;
+}
+
+function lfCollectBM() {
+  const rows = document.querySelectorAll('#lf-bm-rows > div');
+  const result = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name   = inputs[0].value.trim();
+    const points = parseInt(inputs[1].value);
+    const emoji  = inputs[2].value.trim() || (points > 0 ? '⭐' : '💥');
+    if (name && !isNaN(points)) result.push({ name, points, emoji });
+  });
+  return result;
+}
+
+async function lfSave() {
+  const lname = document.getElementById('lf-name').value.trim();
+  const ldate = document.getElementById('lf-date').value;
+  const roster = lfCollectRoster();
+  const bm     = lfCollectBM();
+  if (!lname) { toast('Inserisci il tuo nome!', 'error'); return; }
+  if (!roster.length) { toast('Aggiungi almeno una persona!', 'error'); return; }
+  const data = { laureandoName: lname, laureaDate: ldate, roster, bonusMalus: bm, ts: Date.now() };
+  await fsSet('laureando', 'profile', data);
+  toast("✅ Salvato! L'organizzatore può ora scaricarlo dal pannello admin.", 'success');
+}
+
+async function lfAdminLoad() {
+  const doc = await fsGet('laureando', 'profile');
+  const el = document.getElementById('lf-admin-content');
+  if (!doc || doc.error || !doc.fields) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:.88rem;text-align:center;padding:20px 0;">Nessun dato ancora.</p>';
+    return;
+  }
+  const d = fromFirestore(doc.fields);
+  const rosterList = (d.roster||[]).map((p,i) => `<div style="display:flex;gap:10px;padding:8px 10px;background:${i%2?'var(--bg2)':'transparent'};border-radius:8px;"><span style="flex:1;">${p.name}</span><span style="color:var(--text2);font-size:.85rem;">${p.role}</span></div>`).join('');
+  const bmList = (d.bonusMalus||[]).map((b,i) => `<div style="display:flex;gap:10px;padding:8px 10px;background:${i%2?'var(--bg2)':'transparent'};border-radius:8px;align-items:center;"><span style="flex:1;">${b.emoji} ${b.name}</span><span style="font-weight:700;color:${b.points>0?'var(--green)':'var(--red)'};">${b.points>0?'+':''}${b.points}pt</span></div>`).join('');
+  el.innerHTML = `
+    <div style="margin-bottom:20px;padding:12px 16px;background:var(--bg2);border-radius:10px;">
+      <div style="font-size:.8rem;color:var(--text2);margin-bottom:4px;">Laureando</div>
+      <div style="font-weight:700;font-size:1.1rem;">${d.laureandoName||'—'}</div>
+      ${d.laureaDate?`<div style="font-size:.85rem;color:var(--text2);margin-top:2px;">📅 ${d.laureaDate}</div>`:''}
+    </div>
+    <p class="section-label" style="margin-bottom:8px;">👥 Persone (${(d.roster||[]).length})</p>
+    <div style="margin-bottom:20px;">${rosterList||'<p style="color:var(--text2);font-size:.85rem;">Nessuna persona.</p>'}</div>
+    <p class="section-label" style="margin-bottom:8px;">⚡ Bonus/Malus (${(d.bonusMalus||[]).length})</p>
+    <div>${bmList||'<p style="color:var(--text2);font-size:.85rem;">Nessun evento.</p>'}</div>`;
+  // Store for download
+  window._lfData = d;
+}
+
+function lfAdminDownload(type) {
+  const d = window._lfData;
+  if (!d) { toast('Nessun dato da scaricare', 'error'); return; }
+  const isRoster = type === 'roster';
+  const data = isRoster ? (d.roster||[]) : (d.bonusMalus||[]);
+  if (!data.length) { toast('Nessun dato disponibile', 'error'); return; }
+  const name = (d.laureandoName||'laureando').replace(/\s+/g,'_');
+  const filename = `fantalaurea_${name}_${isRoster?'roster':'bonusmalus'}.json`;
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  toast('✅ ' + filename + ' scaricato!', 'success');
+}
+
+async function lfAdminImport() {
+  const d = window._lfData;
+  if (!d) { toast('Nessun dato da importare', 'error'); return; }
+  let count = 0;
+  for (const p of (d.roster||[])) {
+    const id = p.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('roster', id, { name: p.name, role: p.role||'Ospite', totalPoints: 0 });
+    count++;
+  }
+  for (const bm of (d.bonusMalus||[])) {
+    const id = bm.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, { name: bm.name, points: bm.points, emoji: bm.emoji||'⭐' });
+    count++;
+  }
+  await pollAll();
+  toast(`✅ Importati ${count} elementi nell'app!`, 'success');
+}
+
+function renderLoginForm() {
+  const savedNick = localStorage.getItem('fl_nick');
+  const sec = document.getElementById('pinLoginSection');
+  if (!sec) return;
+  if (savedNick) {
+    // Returning user — show only PIN
+    sec.innerHTML = `
+      <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:4px;">Bentornato</p>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:12px;color:var(--text);">👤 ${savedNick}</div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="pinInput" placeholder="Il tuo PIN" maxlength="4" inputmode="numeric"
+          style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
+          onkeydown="if(event.key==='Enter')joinGameNick()"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"
+          autofocus>
+      </div>
+      <button class="btn btn-primary btn-full btn-sm" onclick="joinGameNick()">🎯 Entra</button>
+      <div style="text-align:center;margin-top:10px;">
+        <button onclick="clearSavedUser()" style="background:none;border:none;color:var(--text2);font-size:.78rem;cursor:pointer;text-decoration:underline;">Non sono io? Cambia utente</button>
+      </div>`;
+  } else {
+    // New user — show name + PIN
+    sec.innerHTML = `
+      <p style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:12px;">Accedi con PIN</p>
+      <div class="form-group" style="margin-bottom:10px;">
+        <input type="text" id="nicknameInput" placeholder="Il tuo nome" maxlength="24" style="width:100%;"
+          onkeydown="if(event.key==='Enter')document.getElementById('pinInput').focus()">
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="pinInput" placeholder="PIN 4 cifre" maxlength="4" inputmode="numeric"
+          style="width:100%;letter-spacing:.3em;font-size:1.3rem;text-align:center;"
+          onkeydown="if(event.key==='Enter')joinGameNick()"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+      </div>
+      <button class="btn btn-secondary btn-full btn-sm" onclick="joinGameNick()">🎯 Registrati</button>`;
+  }
+}
+
+function clearSavedUser() {
+  localStorage.removeItem('fl_nick');
+  localStorage.removeItem('fl_pin');
+  currentNick = null;
+  renderLoginForm();
+}
+
+function toggleGuide() {
+  const el = document.getElementById('guideOverlay');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleAdminLogin() {
+  const el = document.getElementById('adminLoginCard');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function signInWithGoogle() {
+  if (!auth) { toast('Auth non disponibile, usa il nickname', 'error'); return; }
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    toast('Accesso effettuato! 🎉', 'success');
+  } catch(e) {
+    toast('Errore Google: ' + e.message, 'error');
+  }
+}
+
+async function signOut() {
+  if (auth) await auth.signOut();
+  localStorage.removeItem('fl_nick');
+  currentNick = null;
+  document.getElementById('playerNav').style.display = 'none';
+  goTo('home');
+}
+
+async function joinGame() {
+  // Called when user is signed in with Google
+  const user = auth ? auth.currentUser : null;
+  if (!user) { toast('Accedi con Google prima!', 'error'); return; }
+  const nick = user.displayName || user.email.split('@')[0];
+  await _doJoin(nick, user.photoURL);
+}
+
+async function joinGameNick() {
+  const savedNick = localStorage.getItem('fl_nick');
+  const nickEl = document.getElementById('nicknameInput');
+  const nick = savedNick || (nickEl ? nickEl.value.trim() : '');
+  const pin  = document.getElementById('pinInput').value.trim();
+  if (!nick || nick.length < 2) { toast('Inserisci il tuo nome!', 'error'); return; }
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { toast('Inserisci un PIN di 4 cifre!', 'error'); return; }
+
+  // Check if player already exists
+  const existing = await fsGet('players', nick);
+  if (existing && existing.fields) {
+    const data = fromFirestore(existing.fields);
+    // Player exists — verify PIN
+    if (data.pin && data.pin !== pin) {
+      toast('PIN errato! Riprova.', 'error'); return;
+    }
+    // PIN ok or no pin set yet — update pin if missing
+    if (!data.pin) await fsUpdate('players', nick, { pin });
+  } else {
+    // New player — create with PIN
+    await fsSet('players', nick, { nickname:nick, pin, team:[], score:0, ts:Date.now() });
+  }
+  currentNick = nick;
+  localStorage.setItem('fl_nick', nick);
+  localStorage.setItem('fl_pin', pin);
+  document.getElementById('playerNav').style.display = 'block';
+  await pollAll();
+  goTo('draft');
+  toast('Bentornato ' + nick + '! 🎉', 'success');
+}
+
+async function _doJoin(nick, photoURL) {
+  const btn = document.querySelector('#view-home .btn-primary') || document.querySelector('#view-home button');
+  if (btn) { btn.textContent = '⏳ Connessione…'; btn.disabled = true; }
+  try {
+    currentNick = nick;
+    localStorage.setItem('fl_nick', nick);
+    const existing = await fsGet('players', nick);
+    const data = { nickname:nick, team:[], score:0, ts:Date.now() };
+    if (photoURL) data.photoURL = photoURL;
+    if (!existing || existing.error) {
+      await fsSet('players', nick, data);
+    }
+    document.getElementById('playerNav').style.display = 'block';
+    await pollAll();
+    goTo('draft');
+  } catch(e) {
+    toast('Errore connessione: ' + e.message, 'error');
+    if (btn) { btn.textContent = '🎯 Partecipa'; btn.disabled = false; }
+  }
+}
+
+async function loginAdmin() {
+  const pwd  = document.getElementById('adminPwdInput').value;
+  const corr = gameConfig.adminPassword || 'admin123';
+  if (pwd === corr) { isAdmin = true; localStorage.setItem('fl_admin','true'); goTo('admin'); }
+  else toast('Password errata!', 'error');
+}
+
+function adminLogout() {
+  isAdmin = false; localStorage.removeItem('fl_admin'); goTo('home');
+}
+
+function showQuickAdmin() {
+  const popup = document.getElementById('quickAdminPopup');
+  popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+  if (popup.style.display === 'block') document.getElementById('quickAdminPwd').focus();
+}
+
+async function quickLoginAdmin() {
+  const pwd  = document.getElementById('quickAdminPwd').value;
+  const corr = gameConfig.adminPassword || 'admin123';
+  if (pwd === corr) {
+    isAdmin = true;
+    localStorage.setItem('fl_admin','true');
+    document.getElementById('quickAdminPopup').style.display = 'none';
+    document.getElementById('quickAdminPwd').value = '';
+    goTo('admin');
+  } else {
+    toast('Password errata!','error');
+  }
+}
+
+/* ════════════════════════════════
+   DRAFT
+════════════════════════════════ */
+function renderDraftView() {
+  const status   = gameConfig.status || 'setup';
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  const player   = currentNick ? players[currentNick] : null;
+  document.getElementById('draftWaiting').style.display = 'none';
+  document.getElementById('draftDone').style.display    = 'none';
+  document.getElementById('draftOpen').style.display    = 'none';
+
+  if (player && player.team && player.team.length > 0) {
+    document.getElementById('draftDone').style.display = 'block';
+    document.getElementById('draftDoneTeam').innerHTML =
+      player.team.map(id => { const m=roster[id]; const isCap=player.captain===id; return m?`<span class="chip" style="${isCap?'border-color:var(--gold);background:rgba(240,192,64,.2);':''}">${isCap?'👑 ':'✓ '}${m.name}</span>`:''; }).join('');
+    return;
+  }
+  if (status === 'setup' || status === 'finished' || status === 'live') {
+    document.getElementById('draftWaiting').style.display = 'block';
+    document.getElementById('draftWaitMsg').textContent =
+      status==='finished' ? 'La partita è terminata.' :
+      status==='live'     ? 'Il draft è chiuso — partita in corso!' :
+                            'Il draft non è ancora aperto.';
+    return;
+  }
+  // draft open
+  document.getElementById('draftOpen').style.display = 'block';
+  const grid    = document.getElementById('draftRosterGrid');
+  const members = Object.values(roster);
+  grid.innerHTML = !members.length
+    ? '<div class="empty-state">Nessuna persona nel roster ancora.</div>'
+    : members.map(m => {
+        const sel = selectedTeam.includes(m.id);
+        return `<div class="roster-card ${sel?'selected':''}" onclick="toggleMember('${m.id}')">
+          ${sel?'<div class="check-mark">✓</div>':''}
+          <div class="avatar">${initials(m.name)}</div>
+          <div class="r-name">${m.name}</div>
+          <div class="r-role">${m.role||''}</div>
+        </div>`;
+      }).join('');
+
+  const bar = document.getElementById('selectedBar');
+  if (selectedTeam.length > 0) {
+    bar.style.display = 'block';
+    document.getElementById('selectedBarList').innerHTML =
+      selectedTeam.map(id => { const m=roster[id]; return m?`<span class="chip">✓ ${m.name}</span>`:''; }).join('');
+  } else bar.style.display = 'none';
+
+  const btn = document.getElementById('confirmTeamBtn');
+  const teamComplete = selectedTeam.length === teamSize;
+  const captainChosen = selectedCaptain !== null;
+
+  // Show captain picker once team is complete
+  const capSection = document.getElementById('captainSection');
+  if (teamComplete) {
+    capSection.style.display = 'block';
+    capSection.innerHTML = `
+      <p class="section-label" style="margin-bottom:10px;">👑 Scegli il Capitano <span style="color:var(--text2);font-size:.75rem;">(punti doppi!)</span></p>
+      <div class="flex gap-2 flex-wrap">
+        ${selectedTeam.map(id => {
+          const m = roster[id];
+          const isCap = selectedCaptain === id;
+          return m ? `<div onclick="setCaptain('${id}')" style="cursor:pointer;padding:10px 16px;border-radius:10px;border:2px solid ${isCap?'var(--gold)':'var(--border)'};background:${isCap?'rgba(240,192,64,.15)':'var(--bg2)'};transition:all .2s;text-align:center;">
+            <div style="font-size:1.4rem;">${isCap?'👑':'👤'}</div>
+            <div style="font-weight:600;font-size:.88rem;margin-top:4px;">${m.name}</div>
+            ${isCap?'<div style="font-size:.7rem;color:var(--gold);margin-top:2px;">CAPITANO</div>':''}
+          </div>` : '';
+        }).join('')}
+      </div>`;
+  } else {
+    capSection.style.display = 'none';
+    selectedCaptain = null;
+  }
+
+  btn.disabled = !teamComplete || !captainChosen;
+  btn.textContent = !teamComplete
+    ? `Seleziona ancora ${teamSize - selectedTeam.length}`
+    : !captainChosen
+    ? '👑 Scegli il capitano'
+    : '✨ Conferma Squadra';
+}
+
+function setCaptain(id) {
+  selectedCaptain = id;
+  renderDraftView();
+}
+
+function toggleMember(id) {
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  if (selectedTeam.includes(id)) { selectedTeam = selectedTeam.filter(x=>x!==id); }
+  else {
+    if (selectedTeam.length >= teamSize) { toast(`Max ${teamSize} persone!`,'error'); return; }
+    selectedTeam.push(id);
+  }
+  renderDraftView();
+}
+
+async function submitTeam() {
+  if (!currentNick) return;
+  const teamSize = Number(gameConfig.teamSize) || 3;
+  if (selectedTeam.length !== teamSize) { toast(`Seleziona esattamente ${teamSize} persone`,'error'); return; }
+  if (!selectedCaptain) { toast('Scegli il capitano!','error'); return; }
+  await fsUpdate('players', currentNick, { team: selectedTeam, captain: selectedCaptain });
+  toast('Squadra confermata! 🎉','success');
+  await pollAll();
+  renderDraftView();
+}
+
+/* ════════════════════════════════
+   LIVE
+════════════════════════════════ */
+function updateLiveView() {
+  if (!currentNick) return;
+  const player = players[currentNick];
+  if (!player) return;
+  const sorted = sortedPlayers();
+  const rank   = sorted.findIndex(p => p.id === currentNick) + 1;
+  document.getElementById('myRank').textContent  = rank > 0 ? `${rankEmoji(rank)} #${rank}` : '—';
+  document.getElementById('myScore').textContent = player.score || 0;
+  const teamEl = document.getElementById('myTeamLive');
+  if (player.team && player.team.length > 0) {
+    teamEl.innerHTML = player.team.map(id => {
+      const m = roster[id];
+      const isCap = player.captain === id;
+      return m ? `<span class="chip" style="${isCap?'border-color:var(--gold);background:rgba(240,192,64,.2);':''}">${isCap?'👑 ':''}<strong>${m.name}</strong> ${m.totalPoints||0}pt</span>` : '';
+    }).join('');
+  } else teamEl.innerHTML = '<span class="text-muted" style="font-size:.85rem;">Nessuna squadra</span>';
+}
+
+function renderLeaderboards() {
+  const sorted = sortedPlayers();
+  const el = document.getElementById('liveLeaderboard');
+  if (el) el.innerHTML = sorted.map((p,i) => lbItem(p,i+1)).join('');
+  renderEventLog();
+}
+
+function lbItem(p, rank) {
+  const names = (p.team||[]).map(id=>{
+    const m = roster[id];
+    const isCap = p.captain === id;
+    return m ? (isCap ? '👑 ' + m.name : m.name) : '?';
+  }).join(', ');
+  const isMe  = p.id === currentNick;
+  const avatar = p.photoURL
+    ? `<img src="${p.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+    : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#07091a;flex-shrink:0;">${(p.nickname||p.id).slice(0,2).toUpperCase()}</div>`;
+  return `<div class="lb-item ${rank<=3?'top-'+rank:''} ${isMe?'is-me':''}">
+    <div class="lb-rank">${rankEmoji(rank)}</div>
+    ${avatar}
+    <div class="lb-info">
+      <div class="lb-name">${p.nickname||p.id}${isMe?' <span class="chip" style="font-size:.7rem;padding:2px 7px;">Tu</span>':''}</div>
+      <div class="lb-team">${names||'Nessuna squadra'}</div>
+    </div>
+    <div class="lb-score">${p.score||0}</div>
+  </div>`;
+}
+
+function renderEventLog() {
+  const el = document.getElementById('eventLog');
+  if (!el) return;
+  if (!events.length) { el.innerHTML='<div class="empty-state">Nessun evento ancora…</div>'; return; }
+  el.innerHTML = events.map(e => {
+    const bonus = Number(e.points) > 0;
+    return `<div class="event-item ${bonus?'bonus':'malus'}">
+      <span style="font-size:1.2rem;">${e.emoji||''}</span>
+      <span style="flex:1;font-size:.88rem;"><strong>${e.rosterName}</strong> — ${e.eventName}</span>
+      <span class="event-pts ${bonus?'pos':'neg'}">${bonus?'+':''}${e.points}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════
+   LEADERBOARD FINALE
+════════════════════════════════ */
+function renderFinalLeaderboard() {
+  const sorted = sortedPlayers();
+  const podiumEl = document.getElementById('podiumArea');
+  if (sorted.length >= 3) {
+    const [g,s,b] = sorted;
+    podiumEl.innerHTML = `<div class="podium">
+      <div class="podium-slot"><div class="podium-label">${s.nickname||s.id}</div><div class="podium-pts" style="color:#b0b8c8;">${s.score||0}pt</div><div class="podium-block p2">🥈</div></div>
+      <div class="podium-slot"><div class="podium-label">${g.nickname||g.id}</div><div class="podium-pts" style="color:var(--gold);">${g.score||0}pt</div><div class="podium-block p1">🥇</div></div>
+      <div class="podium-slot"><div class="podium-label">${b.nickname||b.id}</div><div class="podium-pts" style="color:#cd7f32;">${b.score||0}pt</div><div class="podium-block p3">🥉</div></div>
+    </div>`;
+    launchConfetti();
+  } else podiumEl.innerHTML = '<div class="empty-state">Servono almeno 3 giocatori per il podio.</div>';
+  document.getElementById('finalLeaderboard').innerHTML = sorted.map((p,i)=>lbItem(p,i+1)).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – CONFIG
+════════════════════════════════ */
+async function saveConfig() {
+  const name   = document.getElementById('cfgGameName').value.trim() || 'FantaLaurea';
+  const size   = parseInt(document.getElementById('cfgTeamSize').value) || 3;
+  const newPwd = document.getElementById('cfgAdminPwd').value;
+  const data   = { name, teamSize:size, status: gameConfig.status||'setup' };
+  if (newPwd) data.adminPassword = newPwd;
+  await fsSet('game','config',data);
+  toast('Salvato!','success');
+  await pollAll();
+}
+
+async function setStatus(s) {
+  await fsUpdate('game','config',{ status:s });
+  toast('Stato → ' + s,'success');
+  await pollAll();
+}
+
+function updateAdminStatusBadge() {
+  const el = document.getElementById('adminStatusBadge');
+  if (!el) return;
+  const map = { setup:['setup','⚙️ Setup'], draft:['draft','📝 Draft aperto'], live:['live','🔴 Gioco in corso'], finished:['finished','🏁 Terminato'] };
+  const s = gameConfig.status || 'setup';
+  const [cls,label] = map[s] || ['setup',s];
+  el.innerHTML = `<span class="badge badge-${cls}">${label}</span>`;
+}
+
+/* ════════════════════════════════
+   ADMIN – ROSTER
+════════════════════════════════ */
+async function addRosterMember() {
+  const name = document.getElementById('rosterName').value.trim();
+  const role = document.getElementById('rosterRole').value.trim();
+  if (!name) { toast('Inserisci un nome!','error'); return; }
+  const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+  await fsSet('roster', id, { name, role, totalPoints:0 });
+  document.getElementById('rosterName').value = '';
+  document.getElementById('rosterRole').value = '';
+  toast('Aggiunto: ' + name,'success');
+  await pollAll();
+}
+
+async function deleteRosterMember(id) {
+  if (confirm('Rimuovere questa persona?')) {
+    await fsDelete('roster', id);
+    toast('Rimosso','success');
+    await pollAll();
+  }
+}
+
+function renderAdminRoster() {
+  const el = document.getElementById('adminRosterList');
+  if (!el) return;
+  const members = Object.values(roster);
+  el.innerHTML = !members.length
+    ? '<div class="empty-state">Nessuna persona aggiunta</div>'
+    : members.map(m=>`<div class="row-list-item">
+        <div class="avatar" style="width:36px;height:36px;min-width:36px;font-size:.85rem;">${initials(m.name)}</div>
+        <div style="flex:1;"><div style="font-weight:600;">${m.name}</div><div class="text-muted" style="font-size:.78rem;">${m.role||''} · ${m.totalPoints||0} punti</div></div>
+        <button class="btn btn-danger btn-sm" onclick="deleteRosterMember('${m.id}')">✕</button>
+      </div>`).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – BONUS/MALUS
+════════════════════════════════ */
+const DEFAULTS = [
+  {name:'Lode!',points:10,emoji:'🌟'},{name:'Risposta perfetta',points:5,emoji:'⭐'},
+  {name:'Applauso spontaneo',points:8,emoji:'👏'},{name:'Battuta che fa ridere la commissione',points:6,emoji:'😂'},
+  {name:'Risponde senza esitare',points:4,emoji:'🎯'},{name:'Stretta di mano del rettore',points:7,emoji:'🤝'},
+  {name:'Primo a fare gli auguri',points:3,emoji:'💐'},{name:'Primo brindisi',points:5,emoji:'🥂'},
+  {name:'Citazione del professore',points:5,emoji:'📚'},{name:'Piange (di gioia)',points:6,emoji:'😭'},
+  {name:'Momento di panico',points:-5,emoji:'😅'},{name:'Telefono suona in aula',points:-8,emoji:'📵'},
+  {name:'Risposta sbagliata',points:-4,emoji:'❌'},{name:'Supera il tempo',points:-3,emoji:'⏰'},
+  {name:'Arriva in ritardo',points:-7,emoji:'🚗'},{name:'Prof si addormenta',points:-6,emoji:'😴'},
+];
+
+async function importBMFromJson(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  let items;
+  try {
+    items = JSON.parse(text);
+  } catch(e) {
+    toast('File JSON non valido!', 'error'); return;
+  }
+  if (!Array.isArray(items)) { toast('Il file deve contenere un array JSON', 'error'); return; }
+  let count = 0;
+  for (const bm of items) {
+    if (!bm.name || bm.points === undefined) continue;
+    const id = bm.name.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,30) + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, {
+      name: bm.name,
+      points: parseInt(bm.points),
+      emoji: bm.emoji || (bm.points > 0 ? '⭐' : '💥')
+    });
+    count++;
+  }
+  toast(`✅ Importati ${count} eventi!`, 'success');
+  event.target.value = '';
+  await pollAll();
+}
+
+async function loadDefaultBM() {
+  for (const bm of DEFAULTS) {
+    const id = bm.name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') + '_' + Date.now() + Math.floor(Math.random()*999);
+    await fsSet('bonusMalus', id, bm);
+  }
+  toast('Preset caricato!','success');
+  await pollAll();
+}
+
+async function addBM() {
+  const name  = document.getElementById('bmName').value.trim();
+  const pts   = parseInt(document.getElementById('bmPts').value);
+  const emoji = document.getElementById('bmEmoji').value.trim() || (pts>0?'⭐':'💥');
+  if (!name || isNaN(pts)) { toast('Compila nome e punti','error'); return; }
+  const id = name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') + '_' + Date.now();
+  await fsSet('bonusMalus', id, {name,points:pts,emoji});
+  document.getElementById('bmName').value = '';
+  document.getElementById('bmPts').value  = '';
+  document.getElementById('bmEmoji').value = '';
+  toast('Aggiunto!','success');
+  await pollAll();
+}
+
+async function deleteBM(id) {
+  await fsDelete('bonusMalus', id);
+  await pollAll();
+}
+
+function renderAdminBM() {
+  const el = document.getElementById('adminBMList');
+  if (!el) return;
+  const items = Object.values(bonusMalus).sort((a,b)=>b.points-a.points);
+  el.innerHTML = !items.length
+    ? '<div class="empty-state">Nessun bonus/malus aggiunto</div>'
+    : items.map(bm=>{
+        const pos = Number(bm.points)>0;
+        return `<div class="row-list-item">
+          <span style="font-size:1.3rem;">${bm.emoji}</span>
+          <div style="flex:1;"><span style="font-weight:600;">${bm.name}</span>
+          <span class="${pos?'text-green':'text-red'}" style="margin-left:8px;font-weight:700;">${pos?'+':''}${bm.points}pt</span></div>
+          <button class="btn btn-danger btn-sm" onclick="deleteBM('${bm.id}')">✕</button>
+        </div>`;
+      }).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN – ASSIGN EVENT
+════════════════════════════════ */
+function populatePersonSelect() {
+  const sel = document.getElementById('eventPersonSelect');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Seleziona persona —</option>' +
+    Object.values(roster).map(m=>`<option value="${m.id}" ${m.id===prev?'selected':''}>${m.name} (${m.role||'N/D'})</option>`).join('');
+}
+
+function renderBMButtons() {
+  const bonusEl = document.getElementById('bmBonusGrid');
+  const malusEl = document.getElementById('bmMalusGrid');
+  if (!bonusEl||!malusEl) return;
+  const bonus = Object.values(bonusMalus).filter(b=>Number(b.points)>0).sort((a,b)=>b.points-a.points);
+  const malus = Object.values(bonusMalus).filter(b=>Number(b.points)<0).sort((a,b)=>a.points-b.points);
+  const btnHtml = (bm,cls) => `<button class="bm-assign-btn ${cls}" onclick="assignEvent('${bm.id}')">
+    <span>${bm.emoji} ${bm.name}</span><strong>${Number(bm.points)>0?'+':''}${bm.points}pt</strong>
+  </button>`;
+  bonusEl.innerHTML = bonus.length ? bonus.map(b=>btnHtml(b,'bonus')).join('') : '<div class="empty-state">Nessun bonus</div>';
+  malusEl.innerHTML = malus.length ? malus.map(b=>btnHtml(b,'malus')).join('') : '<div class="empty-state">Nessun malus</div>';
+}
+
+async function assignEvent(bmId) {
+  const rosterId = document.getElementById('eventPersonSelect').value;
+  if (!rosterId) { toast('Seleziona prima una persona!','error'); return; }
+  const bm = bonusMalus[bmId];
+  const person = roster[rosterId];
+  if (!bm||!person) return;
+
+  const pts = Number(bm.points);
+
+  // Save event
+  await fsAdd('events', {
+    rosterId, rosterName:person.name,
+    bonusId:bmId, eventName:bm.name,
+    emoji:bm.emoji, points:pts, ts:Date.now()
+  });
+
+  // Update roster member total
+  const newTotal = Number(person.totalPoints||0) + pts;
+  await fsUpdate('roster', rosterId, { totalPoints: newTotal });
+
+  // Update players who have this person (double if captain)
+  for (const p of Object.values(players)) {
+    const team = p.team || [];
+    if (team.includes(rosterId)) {
+      const isCaptain = p.captain === rosterId;
+      const earnedPts = isCaptain ? pts * 2 : pts;
+      const newScore = Number(p.score||0) + earnedPts;
+      await fsUpdate('players', p.id, { score: newScore });
+      if (isCaptain) toast(`👑 Capitano! ${bm.emoji} ${bm.name} → ${person.name} (${earnedPts>0?'+':''}${earnedPts}pt x2!)`,'success');
+    }
+  }
+
+  toast(`${bm.emoji} ${bm.name} → ${person.name} (${pts>0?'+':''}${pts}pt)`,'success');
+  await pollAll();
+}
+
+function renderRecentEventsAdmin() {
+  const el = document.getElementById('recentEventsAdmin');
+  if (!el||!events.length) return;
+  el.innerHTML = `<p class="section-label mt-3">Ultimi eventi assegnati</p>` +
+    events.slice(0,6).map(e=>`<div class="row-list-item" style="font-size:.85rem;">
+      <span>${e.emoji}</span>
+      <span style="flex:1;"><strong>${e.rosterName}</strong> — ${e.eventName}</span>
+      <span class="${Number(e.points)>0?'text-green':'text-red'}">${Number(e.points)>0?'+':''}${e.points}</span>
+    </div>`).join('');
+}
+
+function renderAdminPlayers() {
+  const el = document.getElementById('adminPlayersList');
+  if (!el) return;
+  const sorted = sortedPlayers();
+  el.innerHTML = !sorted.length
+    ? '<div class="empty-state">Nessun giocatore ancora</div>'
+    : sorted.map((p,i)=>`<div class="row-list-item">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;min-width:28px;">${rankEmoji(i+1)}</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;">${p.nickname||p.id}</div>
+          <div class="text-muted" style="font-size:.78rem;">${(p.team||[]).map(id=>roster[id]?.name||'?').join(', ')||'Nessuna squadra'}</div>
+        </div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);">${p.score||0}pt</div>
+      </div>`).join('');
+}
+
+/* ════════════════════════════════
+   ADMIN TABS
+════════════════════════════════ */
+function showAdminTab(name,btn) {
+  if (name === 'laureando') setTimeout(lfAdminLoad, 50);
+  document.querySelectorAll('.admin-tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('adminTab-'+name).style.display='block';
+  if (btn) btn.classList.add('active');
+}
+
+/* ════════════════════════════════
+   CONFETTI
+════════════════════════════════ */
+function launchConfetti() {
+  const colors=['#f0c040','#fff','#4ade80','#60a5fa','#f87171','#c084fc'];
+  for (let i=0;i<60;i++) {
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.width=(6+Math.random()*8)+'px';
+    el.style.height=(6+Math.random()*8)+'px';
+    el.style.animationDuration=(2+Math.random()*3)+'s';
+    el.style.animationDelay=(Math.random()*1.5)+'s';
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+function sortedPlayers(){return Object.values(players).sort((a,b)=>(b.score||0)-(a.score||0));}
+function initials(name){if(!name)return'?';return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function rankEmoji(r){if(r===1)return'🥇';if(r===2)return'🥈';if(r===3)return'🥉';return`#${r}`;}
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`toast ${type} show`;
+  setTimeout(()=>{el.className='toast';},3000);
+}
+</script>
+</body>
+</html>      <div id="selectedBar" class="card" style="display:none;padding:16px 24px;">
         <p class="section-label">La tua squadra</p>
         <div id="selectedBarList" class="flex gap-2 flex-wrap"></div>
       </div>
