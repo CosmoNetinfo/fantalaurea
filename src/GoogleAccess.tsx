@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { supabase } from './api';
+import { rememberAuthDestination } from './authReturn';
 
 export default function GoogleAccess({ returnPath, notify }: { returnPath: string; notify: (text: string, error?: boolean) => void }) {
   const [busy, setBusy] = useState(false);
@@ -8,6 +9,7 @@ export default function GoogleAccess({ returnPath, notify }: { returnPath: strin
     if (!supabase || busy) return;
     setBusy(true);
     try {
+      rememberAuthDestination(returnPath);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: new URL(returnPath, location.origin).href },

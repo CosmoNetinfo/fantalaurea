@@ -1,8 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Game, Snapshot } from './domain';
+import { authFailureMessage, readAuthReturn } from './authReturn';
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-export const supabase = url && key ? createClient(url, key) : null;
+// Capture callback errors before the SDK consumes and cleans the URL fragment.
+export const authReturn = readAuthReturn(location.href);
+export const supabase = url && key ? createClient(url, key, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
+}) : null;
+export const authReady = (async () => {
+  if (!supabase) return { error: authReturn.callback ? 'Il collegamento al servizio non è configurato.' : null, session: null };
+  try {
+    const initial = await supabase.auth.initialize();
+    if (authReturn.failed || initial.error) return { error: authFailureMessage(authReturn.description || initial.error?.message || ''), session: null };
+    const { data, error } = await supabase.auth.getSession();
+    if (error || (authReturn.callback && !data.session)) return { error: authFailureMessage(error?.message || ''), session: null };
+    return { error: null, session: data.session };
+  } catch {
+    return { error: authFailureMessage(''), session: null };
+  }
+})();
 export async function rpc<T>(fn: string, params: Record<string, unknown> = {}): Promise<T> {
   if (!supabase) throw new Error('Il servizio non è ancora collegato. Puoi esplorare la demo.');
   const { data, error } = await supabase.rpc(fn, params);
