@@ -1,7 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import '@fontsource-variable/dm-sans';
+import '@fontsource/dm-serif-display/latin-400.css';
+import '@fontsource/dm-serif-display/latin-400-italic.css';
 import './styles.css';
+import './themes.css';
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {failed: boolean}> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
