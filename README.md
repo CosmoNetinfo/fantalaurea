@@ -14,7 +14,7 @@ Le partite reali salvano i dati su **Supabase** e sono separate fra loro. La **d
 
 ## Interfaccia e app installabile
 
-- Marchio vettoriale dedicato: monogramma FL, tocco accademico e dettagli dorati.
+- Logo definitivo **Il nastro** (proposta 08): cappello di laurea con nappa dorata, scritta serif e tratto dorato sotto Laurea.
 - Tema predefinito **Oro**: bianco, nero e oro, con superfici e testi a contrasto maggiore.
 - Palette alternative **Verde** e **Blu**.
 - Modalità **Chiaro**, **Scuro** e **Automatico**, che segue il dispositivo.
@@ -92,7 +92,7 @@ Le verifiche automatiche usano Chromium e l’emulazione mobile. Non sostituisco
 
 ## Marchio e personalizzazione
 
-Il master vettoriale è `public/brand/app-icon.svg`. Per rigenerare tutte le icone dopo averlo modificato:
+Il logo scelto è **08 — Il nastro**, senza monogramma. Le versioni complete chiare e scure sono `public/brand/logo.svg` e `public/brand/logo-dark.svg`; i simboli autonomi sono `symbol.svg` e `symbol-dark.svg`. L’interfaccia usa il simbolo vettoriale e la stessa scritta serif, adattando il colore al tema. Il master dell’icona installabile è `public/brand/app-icon.svg`. Per rigenerare tutte le icone dopo averlo modificato:
 
 ```powershell
 npm run assets

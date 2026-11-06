@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Contrast and screenshots measure settled colors, not an intermediate theme transition.
+test.use({ reducedMotion: 'reduce' });
+
 async function contrastFailures(page: Page) {
   return page.evaluate(() => {
     const rgb = (value: string) => (value.match(/[\d.]+/g) || []).map(Number);
