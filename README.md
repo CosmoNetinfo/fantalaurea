@@ -17,7 +17,7 @@ Apri http://127.0.0.1:5173. La demo `/demo` funziona anche senza Supabase e cons
 
 - Pagina pubblica responsive e interfaccia italiana per organizzatori e invitati.
 - Partite indipendenti e private, con inviti tramite codice, link e QR.
-- Account organizzatore via magic link e partecipazione con nickname tramite Auth anonima.
+- Accesso Google per organizzatori e invitati, magic link email e partecipazione con nickname tramite Auth anonima.
 - Protagonisti, bonus/malus modificabili e dieci regole iniziali.
 - Scelta della squadra e del capitano, punti doppi anche sui malus.
 - Stati preparazione → squadre aperte → gioco → conclusione, validati nel database.

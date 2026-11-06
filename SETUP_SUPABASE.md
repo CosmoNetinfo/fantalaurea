@@ -15,8 +15,10 @@ Se sono stati disattivati i privilegi automatici per nuove tabelle, non occorre 
 In **Authentication → Sign In / Providers**:
 
 - Abilitare **Email**: l'organizzatore accede con un magic link.
+- Per **Google**, creare un client OAuth di tipo **Applicazione web** nella Google Auth Platform. Origine autorizzata: `https://fantalaurea.vercel.app`. URI di reindirizzamento: `https://zymcaovdflmvcfvelnyj.supabase.co/auth/v1/callback` (copiarlo dal provider Supabase se cambia il progetto). Inserire **Client ID** e **Client Secret** esclusivamente nel provider Google di Supabase e abilitarlo. Lasciare disattivati Skip nonce checks e Allow users without an email. Il pulsante è disponibile per organizzatori e invitati, che ritornano rispettivamente a `/organizza` e al loro invito. In Google configurare Audience e utenti di test prima dell'apertura pubblica.
 - Abilitare **Anonymous sign-ins**: gli invitati ottengono un'identità autenticata senza fornire un'email.
 - In **URL Configuration** configurare il Site URL dell'app e gli indirizzi di ritorno consentiti: `http://127.0.0.1:5173/organizza` per lo sviluppo e `https://fantalaurea.vercel.app/organizza` per la pubblicazione sul dominio attuale. Aggiungere eventuali domini di staging effettivi.
+- Per il ritorno Google degli invitati, consentire anche `https://fantalaurea.vercel.app/invito/*` e `https://fantalaurea.vercel.app/partecipa`. Per prove locali aggiungere le route equivalenti sotto `http://127.0.0.1:5173`. In caso di domini differenti, inserire il dominio effettivamente usato.
 - Configurare un provider SMTP prima di aprire le iscrizioni al pubblico: il servizio email incorporato non sostituisce un servizio di invio di produzione.
 
 Un invitato anonimo ritrova la squadra nello stesso browser. La cancellazione dei dati del browser e il cambio dispositivo richiedono una nuova identità. Il collegamento successivo a un account e il recupero della squadra non sono inclusi in questa prima versione.
