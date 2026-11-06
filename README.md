@@ -1,167 +1,55 @@
-# 🎓 FantaLaurea
+# FantaLaurea v2
 
-> Il gioco fantasy della laurea — ispirato al FantaSanremo
+Il fantasy della tua laurea: scegli i protagonisti, invita gli amici, componi una squadra e segui la classifica. Riscrittura in React e TypeScript con Supabase Auth, PostgreSQL e Realtime Broadcast.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CosmoNetinfo/fantalaurea)
-![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey)
-![Stack](https://img.shields.io/badge/stack-HTML%20%2F%20CSS%20%2F%20JS-yellow)
-![Firebase](https://img.shields.io/badge/backend-Firebase%20Firestore-orange)
+## Avvio
 
----
-
-## 🎯 Cos'è
-
-**FantaLaurea** è una web app per rendere la giornata della laurea ancora più divertente. Funziona come il Fantacalcio: ogni partecipante sceglie una squadra di persone presenti alla cerimonia (professori, familiari, amici) e guadagna punti in tempo reale ogni volta che quelle persone fanno qualcosa di divertente, commovente o imbarazzante.
-
-I punteggi si aggiornano live su tutti i telefoni. Nessuna installazione richiesta — basta aprire il link.
-
----
-
-## ✨ Funzionalità
-
-| Feature | Descrizione |
-|---|---|
-| 🔵 Login con Google | Accesso rapido tramite account Google |
-| 🔢 Login con PIN | Nome + PIN 4 cifre, con riconoscimento automatico al ritorno |
-| 👥 Draft squadra | Ogni giocatore sceglie le sue persone dal roster |
-| 👑 Capitano | Una persona della squadra vale punti doppi |
-| ⚡ Punteggi live | Aggiornamento automatico ogni 4 secondi su tutti i dispositivi |
-| 📂 Importa JSON | Carica bonus/malus personalizzati da file |
-| 🏆 Classifica finale | Podio animato con coriandoli |
-| ❓ Guida in-app | Spiegazione completa sempre accessibile ai partecipanti |
-| 🔐 Pannello Admin | Setup, Roster, Bonus/Malus, Gioco, Giocatori |
-
----
-
-## 🛠️ Stack tecnico
-
-- **Frontend:** HTML / CSS / JavaScript vanilla — nessun framework, nessuna dipendenza npm
-- **Backend:** Firebase Firestore (REST API pura via `fetch()` — niente SDK)
-- **Auth:** Firebase Authentication (Google + PIN custom)
-- **Deploy:** Vercel (file statico singolo)
-- **Realtime:** Polling ogni 4 secondi
-
-> Scelta deliberata di non usare l'SDK Firebase per massimizzare la compatibilità con tutti i browser mobili ed evitare problemi CSP.
-
----
-
-## 🚀 Deploy
-
-### 1. Crea il progetto Firebase
-
-1. Vai su [console.firebase.google.com](https://console.firebase.google.com)
-2. Crea un nuovo progetto
-3. Attiva **Firestore Database** (modalità test)
-4. Attiva **Authentication** → Sign-in method → **Google**
-5. In Authentication → **Domini autorizzati** → aggiungi il tuo dominio Vercel
-
-### 2. Configura l'app
-
-Apri `index.html` e aggiorna la sezione `FIREBASE_CONFIG` con i tuoi dati:
-
-```javascript
-const FIREBASE_CONFIG = {
-  apiKey:            "LA-TUA-API-KEY",
-  authDomain:        "il-tuo-progetto.firebaseapp.com",
-  projectId:         "il-tuo-progetto",
-  storageBucket:     "il-tuo-progetto.firebasestorage.app",
-  messagingSenderId: "XXXXXXXXXX",
-  appId:             "1:XXXXXXXXXX:web:XXXXXXXXXX"
-};
+```powershell
+npm ci
+Copy-Item .env.example .env.local
+# Configura URL e chiave pubblicabile del tuo progetto.
+npm run dev
 ```
 
-### 3. Deploy su Vercel
+Apri http://127.0.0.1:5173. La demo `/demo` funziona anche senza Supabase e conserva i dati nel browser. Le vere partite richiedono lo schema e le impostazioni descritte in [SETUP_SUPABASE.md](SETUP_SUPABASE.md).
 
-```bash
-git clone https://github.com/CosmoNetinfo/fantalaurea.git
-cd fantalaurea
-# aggiungi index.html configurato
-git add .
-git commit -m "feat: configurazione Firebase"
-git push origin main
+## Cosa comprende
+
+- Pagina pubblica responsive e interfaccia italiana per organizzatori e invitati.
+- Partite indipendenti e private, con inviti tramite codice, link e QR.
+- Account organizzatore via magic link e partecipazione con nickname tramite Auth anonima.
+- Protagonisti, bonus/malus modificabili e dieci regole iniziali.
+- Scelta della squadra e del capitano, punti doppi anche sui malus.
+- Stati preparazione → squadre aperte → gioco → conclusione, validati nel database.
+- Regia degli eventi, protezione dai doppi invii e annullamento tracciato.
+- Classifica derivata dal registro eventi, senza scritture di punteggio su ogni giocatore.
+- Notifiche private per partita con riconnessione e aggiornamenti periodici di riserva.
+- Classifica finale e condivisione testuale del risultato.
+
+## Verifiche
+
+```powershell
+npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
 ```
 
-Importa il repo su [vercel.com](https://vercel.com) → deploy automatico.
+Per usare un browser già installato, impostare `PLAYWRIGHT_CHROMIUM_EXECUTABLE` al percorso assoluto di Chromium. I test di browser coprono desktop e mobile. I test Postgres verificano la migrazione reale con PGlite e sostituti delle funzioni Supabase Auth/Realtime: isolamento delle lauree, permessi, blocco delle squadre, idempotenza, annullamenti e riferimenti fra partite.
 
----
+## Struttura
 
-## 🎮 Come si usa
+- `src/domain.ts`: regole di punteggio e validazione squadra.
+- `src/demo.ts`: sandbox locale esplicitamente separata dalle partite online.
+- `src/api.ts`: client Supabase e funzioni RPC.
+- `src/App.tsx`: pagine, percorsi organizzatore/giocatore e aggiornamenti live.
+- `src/styles.css`: interfaccia responsive, navigazione mobile e stati di accessibilità.
+- `supabase/migrations/`: schema PostgreSQL, RLS, transazioni e notifiche private.
+- `tests/`: verifiche funzionali, database e browser.
+- `legacy/firebase-index.html`: copia della versione originale per riferimento; non viene inclusa nella build.
 
-### Admin
+La migrazione non trasferisce i dati Firebase. Prima di sostituire il sito pubblico occorre configurare email, accesso anonimo, URL di ritorno, provare due dispositivi reali e completare la verifica di capacità e anti-abuso. I dettagli e i limiti della prima versione sono documentati nella guida di attivazione.
 
-```
-1. Apri l'app → clicca 🔐 → inserisci password admin (default: admin123)
-2. Tab Setup      → imposta nome partita e persone per squadra
-3. Tab Roster     → aggiungi le persone giocabili (prof, familiari, amici…)
-4. Tab Bonus/Malus → carica preset o importa JSON personalizzati
-5. Tab Gioco      → Apri Draft → manda il link nel gruppo
-6. Durante la cerimonia → assegna eventi in tempo reale
-7. Alla fine → Termina → appare la classifica finale
-```
+## Licenza
 
-### Giocatori
-
-```
-1. Apri il link ricevuto su WhatsApp
-2. Accedi con Google oppure inserisci Nome + PIN
-3. Scegli la tua squadra durante il Draft
-4. Nomina il Capitano (punti doppi 👑)
-5. Segui la classifica live durante la cerimonia
-```
-
----
-
-## 📂 File inclusi
-
-```
-fantalaurea/
-├── index.html                    # App completa (single file)
-├── vercel.json                   # Configurazione Vercel
-├── bonusmalus_fantalaurea.json   # 30 eventi per laurea in Graphic Design
-├── bonusmalus_vestiti.json       # 20 eventi su look e accessori
-└── README.md
-```
-
-### Formato JSON bonus/malus
-
-```json
-[
-  { "name": "Risposta perfetta", "points": 5,  "emoji": "⭐" },
-  { "name": "Telefono che squilla", "points": -8, "emoji": "📵" }
-]
-```
-
----
-
-## 🗄️ Struttura Firestore
-
-```
-game/
-  config → { name, teamSize, adminPassword, status }
-
-roster/
-  {id} → { name, role, totalPoints }
-
-bonusMalus/
-  {id} → { name, points, emoji }
-
-players/
-  {nickname} → { nickname, pin, team[], captain, score, photoURL, ts }
-
-events/
-  {id} → { rosterId, rosterName, bonusId, eventName, emoji, points, ts }
-```
-
----
-
-## 📄 Licenza
-
-[Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/)
-
-- ✅ Puoi usare e modificare il progetto liberamente
-- ✅ Devi citare l'autore originale ([CosmoNetinfo](https://github.com/CosmoNetinfo))
-- ❌ Non puoi usarlo per scopi commerciali senza permesso esplicito
-
----
-
-*Creato con ❤️ da [CosmoNet.info](https://www.cosmonet.info) — per rendere ogni laurea indimenticabile*
+Rimane la licenza originale [CC BY-NC 4.0](LICENSE). Progetto di [CosmoNet](https://www.cosmonet.info), [CosmoNetinfo](https://github.com/CosmoNetinfo).
